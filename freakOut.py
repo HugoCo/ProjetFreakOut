@@ -34,17 +34,20 @@ def is_valid(board_card, player_card):
         return True
     return False
 
+def pioche(pile):
+    pile_content=pile[0]
+    pile.pop(0)
+    return pile_content
+
+
+
+
 
 if __name__ == "__main__":
     # Initialisation Pile
     # les numéros négatifs représenteront les bleus tandis que les numéros négatifs seront les rouges
     pile = Array('i', range(-10, 10))
     random.shuffle(pile)
-
-    numPremCarte = int(random.random()*21)
     numJoueur = input("Entrez le nb de joueur :")
-    theBoard = Board(numPremCarte, 2)
-    while(gameIsNotOver):
-        numC = input("Entrez le numéro de la carte")
-        colorC = input("Entrez r ou b:")
-        numJ = input("Entrez votre numéro de joueur:")
+    theBoard = Board(1, 2)
+    
