@@ -1,6 +1,7 @@
 import random
 from multiprocessing import Process, Value, Array
 from queue import Queue
+import sysv_ipc
 
 
 """class Card:
@@ -18,8 +19,8 @@ from queue import Queue
 
 
 class Board:
-    def __init__(self, card, numPlayers):
-        self.card = card
+    def __init__(self, numCard, numPlayers):
+        self.card = numCard
         processes = []
         for i in range(0, numPlayers):
             p = Player()
@@ -41,19 +42,15 @@ class Pile:
 """
 
 if __name__ == "__main__":
-
     # Initialisation Pile
-    pile=Array('i',range(20))
-    for i in range (-10,11): #les numéros négatifs représenteront les bleus tandis que les numéros négatifs seront les rouges    
-        if(i!=0):
-            pile[i]=i
-    
-    """for i in range(2):
-        for j in range(1, 11):
-            if i == 0:
-                cardPile.append(Card(j, "blue"))
-            else:
-                cardPile.append(Card(j, "red"))
-    """
+    pile=Array('i',range(-10,10)) #les numéros négatifs représenteront les bleus tandis que les numéros négatifs seront les rouges 
     random.shuffle(pile)
-    print(pile)
+
+    numPremCarte=int(random.random()*21)
+    numJoueur=input("Entrez le nb de joueur :")
+    theBoard=Board(numPremCarte,2)
+    while(gameIsNotOver):
+        numC=input("Entrez le numéro de la carte")
+        colorC=input("Entrez r ou b:")
+        numJ=input("Entrez votre numéro de joueur:")
+    
