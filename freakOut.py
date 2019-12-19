@@ -1,3 +1,6 @@
+# ce qu'il reste à faire : - message queue, protection des données
+
+
 import sysv_ipc
 from queue import Queue
 import random
@@ -25,6 +28,7 @@ class Board:
         for i in range(0, numPlayers):
             p = Player()
             processes.append(p)
+            #il faut start les processes
 
 
 def is_valid(board_card, player_card):
