@@ -6,18 +6,12 @@ from queue import Queue
 import random
 from multiprocessing import Process, Value, Array, Lock
 
-"""class Card:
-
-    def __init__(self, numCol):
-
-        self.numCol=numCol
-
-    def __str__(self):
-        return "La carte est:" + str(self.num) + " " + self.color
-"""
-
 # class Player(Process, ID):
 #   def __init__(self, Pile):
+key_BtoP = 128
+key_PtoB = 129
+mq_BtoP = sysv_ipc.MessageQueue(key_BtoP, sysv_ipc.IPC_CREAT)
+mq_PtoB = sysv_ipc.MessageQueue(key_PtoB)
 
 
 class Board:
@@ -55,6 +49,28 @@ def pioche(pile):
 
 
 if __name__ == "__main__":
+    #Creating Message Queue Board to Player
+    value_BtoP = 1
+    while value_BtoP:
+        try:
+            value_BtoP = int(input())
+        except:
+            print("Input error, try again!")
+        message_BtoP = str(value_BtoP).encode()
+        mq_BtoP.send(message_BtoP)
+    mq_BtoP.remove()
+
+    #Creating Message Queue Player to Board
+    while True:
+        message_PtoB, t = mq_PtoB.receive()
+        value_PtoB = message_PtoB.decode()
+        value_PtoB = int(value_PtoB)
+        if value_PtoB:
+            print("received:", value_PtoB)
+        else:
+            print("exiting.")
+            break
+
     # Initialisation Pile
     # les numéros négatifs représenteront les bleus tandis que les numéros négatifs seront les rouges
     pile = Array('i', range(-10, 10))
