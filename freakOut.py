@@ -4,8 +4,7 @@
 import sysv_ipc
 from queue import Queue
 import random
-from multiprocessing import Process, Value, Array
-
+from multiprocessing import Process, Value, Array, Lock
 
 """class Card:
 
@@ -22,14 +21,21 @@ from multiprocessing import Process, Value, Array
 
 
 class Board:
-    def __init__(self, numCard, numPlayers):
+    def __init__(self, numCard, numPlayers,lock):
         self.card = numCard
         processes = []
         for i in range(0, numPlayers):
             p = Player()
             processes.append(p)
             #il faut start les processes
+    def run(self):
+        while(! is__finished()):
+            
 
+def is_finished(pile,lock):
+    if (len(pile)==0):
+        return True
+    return False
 
 def is_valid(board_card, player_card):
     if ((player_card == board_card + 1)
@@ -47,11 +53,13 @@ def pioche(pile):
 
 
 
+
 if __name__ == "__main__":
     # Initialisation Pile
     # les numéros négatifs représenteront les bleus tandis que les numéros négatifs seront les rouges
     pile = Array('i', range(-10, 10))
+    lock=Lock()
     random.shuffle(pile)
     numJoueur = input("Entrez le nb de joueur :")
-    theBoard = Board(1, 2)
+    theBoard = Board(1, 2, lock)
     
