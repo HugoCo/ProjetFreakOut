@@ -1,26 +1,40 @@
 import sysv_ipc
 from queue import Queue
 import random
-import timer
+import time
 from multiprocessing import Process, Value, Array, Lock
+
+key_BtoP = 128
+key_PtoB = 129
+mq_BtoP = sysv_ipc.MessageQueue(key_BtoP, sysv_ipc.IPC_CREAT)
+mq_PtoB = sysv_ipc.MessageQueue(key_PtoB)
 
 
 class Player(Process, ID):
-    def __init__(self, Pile, lock):
-        self.main = []
-        for i in range 5:
-            self.main.append(pioche(Pile, lock))
+    def __init__(self, Pile,lock):
+        self.hand=[]
+        for i in range (6):
+            self.hand.append(pioche(Pile,lock))
 
     def run_random(self):
-        message = 0
-        while(! is_finished()):
+        message=0
+        while(len(self.hand) != 0):
             message_BtoP, t = mq_BtoP.receive()
             value_BtoP = message_BtoP.decode()
             value_BtoP = int(value_BtoP)
-            if value_BtoP:  # Value_PtoB sera un tableau avec 2 cases : la première est la valeur de la carte, la 2e, le numéro du joueur
+            if value_BtoP: #Value_PtoB sera un tableau avec 2 cases : la première est la valeur de la carte, la 2e, le numéro du joueur
+                if value_BtoP<100:
+                    card_on_top_of_pile=value_BtoP
+
+                for card in self.hand:
+                        if value_BtoP == card:
+                            self.hand.remove(card)
+                        elif value_BtoP == (100 + card):
+                            self.hand.append(pioche())
+                            
                 print("received:", value_PtoB)
-                time_to_play = random.random()*10
-                card_to_play = -10+int(20*random.random())
+                time_to_play=random.random()*10
+                card_to_play=self.hand[int(random.random(len(self.hand)))]
                 time.sleep(time_to_play)
                 message_PtoB = str(value_PtoB).encode()
                 mq_PtoB.send(message_PtoB)
@@ -29,6 +43,7 @@ class Player(Process, ID):
                 print("exiting.")
                 break
 
+<<<<<<< HEAD
             if(message):
 
 
@@ -64,6 +79,8 @@ mq_PtoB = sysv_ipc.MessageQueue(key_PtoB)
 """
 
 
+=======
+>>>>>>> 40ed49fba484a9c94aa6284c86eb1a53950169d6
 class Board:
     def __init__(self, numCard, numPlayers, pile, lock):
         self.card = numCard
@@ -79,6 +96,7 @@ class Board:
     def run(self, pile, lock):
         first_card = pioche(pile, lock)
         mq_BtoP.send(str(first_card).encode())
+<<<<<<< HEAD
         message = 0
         while(! is__finished()):
             while timer < 10000:
@@ -86,6 +104,15 @@ class Board:
                 while message:
                     message_BtoP = str(value_BtoP).encode()
                     mq_BtoP.send(message_BtoP)
+=======
+        message=0
+        while(not is_finished(pile,lock)):
+            #Message queue Board to Player
+            while message:
+                message_BtoP = str(value_BtoP).encode()
+                mq_BtoP.send(message_BtoP)
+                
+>>>>>>> 40ed49fba484a9c94aa6284c86eb1a53950169d6
 
                 # Message Queue Player to Board
                 while True:
@@ -113,6 +140,7 @@ class Board:
         mq_BtoP.remove()
         mq_PtoB.remove()
 
+<<<<<<< HEAD
         # Message Queue Player to Board
         while True:
                 message_PtoB, t = mq_PtoB.receive()
@@ -137,12 +165,14 @@ class Board:
         mq_BtoP.remove()
         mq_PtoB.remove()
 
+=======
+>>>>>>> 40ed49fba484a9c94aa6284c86eb1a53950169d6
 
 def is_finished(pile, lock):
-    with lock
-    if (len(pile) == 0):
-        return True
-    return False
+    with lock:
+        if (len(pile) == 0):
+            return True
+        return False
 
 
 def is_valid(board_card, player_card):
