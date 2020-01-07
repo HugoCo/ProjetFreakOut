@@ -106,6 +106,8 @@ class Board:
                     break
         mq_BtoP.remove()
         mq_PtoB.remove()
+
+        
             
             
 
