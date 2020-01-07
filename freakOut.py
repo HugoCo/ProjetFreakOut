@@ -38,7 +38,7 @@ mq_BtoP = sysv_ipc.MessageQueue(key_BtoP, sysv_ipc.IPC_CREAT)
 mq_PtoB = sysv_ipc.MessageQueue(key_PtoB)
 
 
-class Player(Process):
+"""class Player(Process):
     def __init__(self, Pile, ID):
         self.Pile = Pile
         cartes_main = []
@@ -61,6 +61,7 @@ class Player(Process):
         if mq_PtoB.size() != 0:
             return True
         return False
+"""
 
 
 class Board:
@@ -75,10 +76,10 @@ class Board:
         start = time.time()
         # il faut start les processes
 
-    def run(self,pile,lock):
-        first_card=pioche(pile,lock)
+    def run(self, pile, lock):
+        first_card = pioche(pile, lock)
         mq_BtoP.send(str(first_card).encode())
-        message=0
+        message = 0
         while(! is__finished()):
             while timer < 10000:
                 # Message queue Board to Player
@@ -106,20 +107,14 @@ class Board:
                             value_BtoP = int(100+value_PtoB[0])
                         mq_PtoB.empty()
 
-<<<<<<< HEAD
-=======
                 else:
                     print("exiting.")
                     break
         mq_BtoP.remove()
         mq_PtoB.remove()
 
-        
-            
-            
-
-            # Message Queue Player to Board
-            while True:
+        # Message Queue Player to Board
+        while True:
                 message_PtoB, t = mq_PtoB.receive()
                 value_PtoB = message_PtoB.decode()
                 value_PtoB = int(value_PtoB)
@@ -133,7 +128,6 @@ class Board:
                         self.card = value_PtoB[0]
                         message = 1
                         value_BtoP = int(value_PtoB[0])
->>>>>>> 165e9930a295fc84a39d3b5a189c9449b7dddcc3
                     else:
                         print("exiting.")
                         break

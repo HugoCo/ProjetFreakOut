@@ -1,4 +1,6 @@
 import sysv_ipc
+import os
+player_ID = os.getpid()
 
 key_BtoP = 128
 key_PtoB = 129
