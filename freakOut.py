@@ -38,7 +38,7 @@ class Player(Process, ID):
                 time.sleep(time_to_play)
                 message_PtoB = str(value_PtoB).encode()
                 mq_PtoB.send(message_PtoB)
-                
+
             else:
                 print("exiting.")
                 break
@@ -50,7 +50,10 @@ class Board:
         for i in range(0, numPlayers):
             p = Player(Pile, )
             processes.append(p)
-            # il faut start les processes
+            p.start()
+
+        start = time.time()
+        # il faut start les processes
 
     def run(self,pile,lock):
         first_card=pioche(pile,lock)
@@ -63,22 +66,28 @@ class Board:
                 mq_BtoP.send(message_BtoP)
                 
 
-            # Message Queue Player to Board
-            while True:
-                message_PtoB, t = mq_PtoB.receive()
-                value_PtoB = message_PtoB.decode()
-                value_PtoB = int(value_PtoB)
-                if value_PtoB: #Value_PtoB sera un tableau avec 2 cases : la première est la valeur de la carte, la 2e, le numéro du joueur
-                    print("received:", value_PtoB)
-                    numJoueur=value_PtoB[1]
-                    if is_valid(self.card,value_PtoB[0]):                        
-                        self.card=value_PtoB[0]
-                        message=1
-                        value_BtoP=int(value_PtoB[0])
-                    else:
-                        value_BtoP=int(100+value_PtoB[0]) # Si mauvais on renvoie le numéro de la carte + 100
-                    mq_PtoB.empty()
+                # Message Queue Player to Board
+                while True:
+                    message_PtoB, t = mq_PtoB.receive()
+                    value_PtoB = message_PtoB.decode()
+                    value_PtoB = int(value_PtoB)
+                    if value_PtoB:
+                        # Value_PtoB sera un tableau avec 2 cases :
+                        # la première est la valeur de la carte, la 2e,
+                        # le numéro du joueur
+                        print("received:", value_PtoB)
+                        numJoueur = value_PtoB[1]
+                        if is_valid(self.card, value_PtoB[0]):
+                            self.card = value_PtoB[0]
+                            message = 1
+                            value_BtoP = int(value_PtoB[0])
+                        else:
+                            # Si mauvais on renvoie le numéro de la carte + 100
+                            value_BtoP = int(100+value_PtoB[0])
+                        mq_PtoB.empty()
 
+<<<<<<< HEAD
+=======
                 else:
                     print("exiting.")
                     break
@@ -130,4 +139,3 @@ if __name__ == "__main__":
     random.shuffle(pile)
     numJoueur = input("Entrez le nb de joueur :")
     theBoard = Board(1, 2, pile, lock)
-    
