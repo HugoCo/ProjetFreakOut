@@ -4,10 +4,35 @@
 import sysv_ipc
 from queue import Queue
 import random
+import time
 from multiprocessing import Process, Value, Array, Lock
 
-# class Player(Process, ID):
-#   def __init__(self, Pile):
+class Player(Process, ID):
+    def __init__(self, Pile,lock):
+        self.main=[]
+        for i in range 5:
+            self.main.append(pioche(Pile,lock))
+
+    def run_random(self):
+        message=0
+        while(! is_finished()):
+            message_BtoP, t = mq_BtoP.receive()
+            value_BtoP = message_BtoP.decode()
+            value_BtoP = int(value_BtoP)
+            if value_BtoP: #Value_PtoB sera un tableau avec 2 cases : la première est la valeur de la carte, la 2e, le numéro du joueur
+                print("received:", value_PtoB)
+                time_to_play=random.random()*10
+                card_to_play=-10+int(20*random.random())
+                time.sleep(time_to_play)
+                message_PtoB = str(value_PtoB).encode()
+                mq_PtoB.send(message_PtoB)
+                
+            else:
+                print("exiting.")
+                break
+
+            if(message):
+
 key_BtoP = 128
 key_PtoB = 129
 mq_BtoP = sysv_ipc.MessageQueue(key_BtoP, sysv_ipc.IPC_CREAT)
@@ -15,7 +40,7 @@ mq_PtoB = sysv_ipc.MessageQueue(key_PtoB)
 
 
 class Board:
-    def __init__(self, numCard, numPlayers, lock):
+    def __init__(self, numCard, numPlayers, pile, lock):
         self.card = numCard
         processes = []
         for i in range(0, numPlayers):
@@ -23,7 +48,9 @@ class Board:
             processes.append(p)
             # il faut start les processes
 
-    def run(self):
+    def run(self,pile,lock):
+        first_card=pioche(pile,lock)
+        mq_BtoP.send(str(first_card).encode())
         message=0
         while(! is__finished()):
             #Message queue Board to Player
@@ -88,5 +115,5 @@ if __name__ == "__main__":
     lock=Lock()
     random.shuffle(pile)
     numJoueur = input("Entrez le nb de joueur :")
-    theBoard = Board(1, 2, lock)
+    theBoard = Board(1, 2, pile, lock)
     
