@@ -106,6 +106,34 @@ class Board:
                             value_BtoP = int(100+value_PtoB[0])
                         mq_PtoB.empty()
 
+<<<<<<< HEAD
+=======
+                else:
+                    print("exiting.")
+                    break
+        mq_BtoP.remove()
+        mq_PtoB.remove()
+
+        
+            
+            
+
+            # Message Queue Player to Board
+            while True:
+                message_PtoB, t = mq_PtoB.receive()
+                value_PtoB = message_PtoB.decode()
+                value_PtoB = int(value_PtoB)
+                if value_PtoB:
+                    # Value_PtoB sera un tableau avec 2 cases :
+                    # la première est la valeur de la carte, la 2e,
+                    # le numéro du joueur
+                    print("received:", value_PtoB)
+                    numJoueur = value_PtoB[1]
+                    if is_valid(self.card, value_PtoB[0]):
+                        self.card = value_PtoB[0]
+                        message = 1
+                        value_BtoP = int(value_PtoB[0])
+>>>>>>> 165e9930a295fc84a39d3b5a189c9449b7dddcc3
                     else:
                         print("exiting.")
                         break
