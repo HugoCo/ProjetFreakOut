@@ -2,171 +2,12 @@ import sysv_ipc
 from queue import Queue
 import random
 import time
+import ast
 from multiprocessing import Process, Value, Array, Lock
 
-key_BtoP = 128
-key_PtoB = 129
-mq_BtoP = sysv_ipc.MessageQueue(key_BtoP, sysv_ipc.IPC_CREAT)
-mq_PtoB = sysv_ipc.MessageQueue(key_PtoB)
+key = 128
+mq = sysv_ipc.MessageQueue(key, sysv_ipc.IPC_CREAT)
 
-
-class Player(Process, ID):
-    def __init__(self, Pile,lock):
-        self.hand=[]
-        for i in range (6):
-            self.hand.append(pioche(Pile,lock))
-
-    def run_random(self):
-        message=0
-        while(len(self.hand) != 0):
-            message_BtoP, t = mq_BtoP.receive()
-            value_BtoP = message_BtoP.decode()
-            value_BtoP = int(value_BtoP)
-            if value_BtoP: #Value_PtoB sera un tableau avec 2 cases : la première est la valeur de la carte, la 2e, le numéro du joueur
-                if value_BtoP<100:
-                    card_on_top_of_pile=value_BtoP
-
-                for card in self.hand:
-                        if value_BtoP == card:
-                            self.hand.remove(card)
-                        elif value_BtoP == (100 + card):
-                            self.hand.append(pioche())
-                            
-                print("received:", value_PtoB)
-                time_to_play=random.random()*10
-                card_to_play=self.hand[int(random.random(len(self.hand)))]
-                time.sleep(time_to_play)
-                message_PtoB = str(value_PtoB).encode()
-                mq_PtoB.send(message_PtoB)
-
-            else:
-                print("exiting.")
-                break
-
-<<<<<<< HEAD
-            if(message):
-
-
-key_BtoP = 128
-key_PtoB = 129
-mq_BtoP = sysv_ipc.MessageQueue(key_BtoP, sysv_ipc.IPC_CREAT)
-mq_PtoB = sysv_ipc.MessageQueue(key_PtoB)
-
-
-"""class Player(Process):
-    def __init__(self, Pile, ID):
-        self.Pile = Pile
-        cartes_main = []
-        for i in range(6):
-            mains.append(pioche())
-
-    def run_player(Player):
-        while len(Player.cartes_main) != 0:
-                if mq_PtoB.size:
-                    lire message(=cartemsg) que player to Board
-                    for carte in Player.cartes_main:
-                        if cartemsg = carte:
-                            Player.carte_main.remove(carte)
-                        elif cartemsg = 100 + carte
-                        main.append(pioche())
-            cartes_mains.append(pioche[0])
-
-
-    def carte_joue():
-        if mq_PtoB.size() != 0:
-            return True
-        return False
-"""
-
-
-=======
->>>>>>> 40ed49fba484a9c94aa6284c86eb1a53950169d6
-class Board:
-    def __init__(self, numCard, numPlayers, pile, lock):
-        self.card = numCard
-        processes = []
-        for i in range(0, numPlayers):
-            p = Player(Pile, )
-            processes.append(p)
-            p.start()
-
-        start = time.time()
-        # il faut start les processes
-
-    def run(self, pile, lock):
-        first_card = pioche(pile, lock)
-        mq_BtoP.send(str(first_card).encode())
-<<<<<<< HEAD
-        message = 0
-        while(! is__finished()):
-            while timer < 10000:
-                # Message queue Board to Player
-                while message:
-                    message_BtoP = str(value_BtoP).encode()
-                    mq_BtoP.send(message_BtoP)
-=======
-        message=0
-        while(not is_finished(pile,lock)):
-            #Message queue Board to Player
-            while message:
-                message_BtoP = str(value_BtoP).encode()
-                mq_BtoP.send(message_BtoP)
-                
->>>>>>> 40ed49fba484a9c94aa6284c86eb1a53950169d6
-
-                # Message Queue Player to Board
-                while True:
-                    message_PtoB, t = mq_PtoB.receive()
-                    value_PtoB = message_PtoB.decode()
-                    value_PtoB = int(value_PtoB)
-                    if value_PtoB:
-                        # Value_PtoB sera un tableau avec 2 cases :
-                        # la première est la valeur de la carte, la 2e,
-                        # le numéro du joueur
-                        print("received:", value_PtoB)
-                        numJoueur = value_PtoB[1]
-                        if is_valid(self.card, value_PtoB[0]):
-                            self.card = value_PtoB[0]
-                            message = 1
-                            value_BtoP = int(value_PtoB[0])
-                        else:
-                            # Si mauvais on renvoie le numéro de la carte + 100
-                            value_BtoP = int(100+value_PtoB[0])
-                        mq_PtoB.empty()
-
-                else:
-                    print("exiting.")
-                    break
-        mq_BtoP.remove()
-        mq_PtoB.remove()
-
-<<<<<<< HEAD
-        # Message Queue Player to Board
-        while True:
-                message_PtoB, t = mq_PtoB.receive()
-                value_PtoB = message_PtoB.decode()
-                value_PtoB = int(value_PtoB)
-                if value_PtoB:
-                    # Value_PtoB sera un tableau avec 2 cases :
-                    # la première est la valeur de la carte, la 2e,
-                    # le numéro du joueur
-                    print("received:", value_PtoB)
-                    numJoueur = value_PtoB[1]
-                    if is_valid(self.card, value_PtoB[0]):
-                        self.card = value_PtoB[0]
-                        message = 1
-                        value_BtoP = int(value_PtoB[0])
-                    else:
-                        print("exiting.")
-                        break
-                end = time.time()
-                timer = end - start
-                timer = 0
-        mq_BtoP.remove()
-        mq_PtoB.remove()
-
-=======
->>>>>>> 40ed49fba484a9c94aa6284c86eb1a53950169d6
 
 def is_finished(pile, lock):
     with lock:
@@ -185,28 +26,97 @@ def is_valid(board_card, player_card):
 
 def pioche(pile, lock):
     with lock:
-        pile_content = pile[0]
+        card_from_pile = pile[0]
         pile.pop(0)
-    return pile_content
+    return card_from_pile
+
+
+class Player(Process, ID):
+    def __init__(self, Pile, lock):
+        self.hand = []
+        for i in range(6):
+            self.hand.append(pioche(Pile, lock))
+
+    def run_random(self):
+        while(len(self.hand) != 0):
+            msg_BtoP, t = mq.receive()
+            msg_BtoP = msg_BtoP.decode()
+            msg_BtoP = ast.literal_eval(msg_BtoP)
+            # msg_BtoP est un tuple avec 3 valeurs :
+            # (destinataire, source, valeur de la carte)
+            if msg_BtoP[3] < 100:  # faire + 200 parce que -10+100 = 90 <100
+                top_of_pile = msg_BtoP[3]
+
+            for card in self.hand:
+                if msg_BtoP[3] == card:
+                    self.hand.remove(card)
+                elif msg_BtoP[3] == (100 + card):
+                    self.hand.append(pioche())
+
+            print("received:", msg_BtoP[3])
+            time_to_play = random.random()*10
+            card_to_play = self.hand[int(random.random(len(self.hand)))]
+            time.sleep(time_to_play)
+            # Pourquoi on renvoie ici ?
+            # message_PtoB = str(value_PtoB).encode()
+            # mq_PtoB.send(message_PtoB)
+
+
+class Board:
+    def __init__(self, numCard, numPlayers, pile, lock):
+        self.card = numCard
+        processes = []
+        for i in range(0, numPlayers):
+            p = Player(pile, "ID")
+            processes.append(p)
+            p.start()
+
+        # il faut start les processes
+
+    def run(self, pile, lock):
+        first_card = pioche(pile, lock)
+        mq.send(str(first_card).encode())
+        message = 0
+        timer = 0
+        start = time.time()
+        end = time.time()
+        while not is_finished():
+            while timer < 10:
+                timer = end - start
+                """
+                # Message queue Board to Player
+                while message:
+                    message_BtoP = str(value_BtoP).encode()
+                    mq_BtoP.send(message_BtoP)
+                """
+                msg_PtoB, t = mq.receive()
+                msg_PtoB = msg_PtoB.decode()
+                msg_PtoB = ast.literal_eval(msg_PtoB)
+
+                # msg_PtoB est un tuple avec 3 valeurs :
+                # (destinataire, source, valeur de la carte)
+                if msg_PtoB[0] == "board":
+                    print("received:", msg_PtoB)
+                    if is_valid(self.card, msg_PtoB[2]):
+                        self.card = msg_PtoB[2]
+                        received_card = int(msg_PtoB[2])
+                    else:
+                        # Si mauvais on renvoie le numéro de la carte + 100
+                        received_card = int(100+msg_PtoB[2])
+                    mq.remove()
+                    msg_BtoP = msg_PtoB[1] + ", " + msg_PtoB[0]
+                    + ", " + str(received_card)
+                    mq.send(msg_BtoP.encode())
+                    is_finished(pile, lock)
+                    end = time.time()
+        mq.remove()
 
 
 if __name__ == "__main__":
-    # Creating Message Queue Board to Player
-
-    #Creating Message Queue Player to Board
-    while True:
-        message_PtoB, t = mq_PtoB.receive()
-        value_PtoB = message_PtoB.decode()
-        value_PtoB = int(value_PtoB)
-        if value_PtoB:
-            print("received:", value_PtoB)
-        else:
-            print("exiting.")
-            break
 
     # Initialisation Pile
-    # les numéros négatifs représenteront les bleus tandis que les numéros
-    # négatifs seront les rouges
+    # les numéros négatifs représentent les cartes bleus
+    # et les numéros positifs les rouges
     pile = Array('i', range(-10, 10))
     lock = Lock()
     random.shuffle(pile)
