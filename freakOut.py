@@ -1,5 +1,4 @@
 import sysv_ipc
-from queue import Queue
 import random
 import time
 import ast
@@ -79,7 +78,7 @@ def pioche(pile, lock):
     return card_from_pile
 
 
-class Player(Process, ID):
+class Player(Process):
     def __init__(self, Pile, lock):
         self.hand = []
         for i in range(6):
@@ -114,6 +113,9 @@ if __name__ == "__main__":
     # Initialisation Pile
     # les numéros négatifs représentent les cartes bleus
     # et les numéros positifs les rouges
+
+    # faire une fonction d'initialisation ou on construit une liste
+    # avec tous les process ID
     pile = Array('i', range(-10, 10))
     lock = Lock()
     random.shuffle(pile)
