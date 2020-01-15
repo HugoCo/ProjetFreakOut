@@ -6,7 +6,12 @@ key = 128
 
 mq = sysv_ipc.MessageQueue(key)
 user_input = 0
+
 if __name__ == "__main__":
+
+    print("Starting")
+    pid_init = str(player_ID)
+    mq.send(pid_init.encode())
     # Creating Message Queue Player to Board (server)
     while user_input != "quit":
         try:
@@ -18,5 +23,4 @@ if __name__ == "__main__":
         msg_PtoB = ("board" + ", " + str(player_ID)
                     + ", " + str(user_input)).encode()
         mq.send(msg_PtoB)
-
-        mq.remove()
+    mq.remove()
