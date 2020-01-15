@@ -29,6 +29,48 @@ def pioche(pile, lock):
         pile.pop(0)
     return card_from_pile
 
+class Board:
+    def __init__(self, numCard, numPlayers, pile, lock):
+        self.card = numCard
+        processes = []
+        for i in range(0, numPlayers):
+            p = Player(Pile, )
+            processes.append(p)
+            p.start()
+
+        start = time.time()
+        # il faut start les processes
+
+    def run(self,pile,lock):
+        first_card=pioche(pile,lock)
+        mq_BtoP.send(("2,1,"+str(first_card)).encode())
+        message=0
+        while(not is_finished(pile,lock)):
+            #Message queue Board to Player
+            while message:
+                message_BtoP = str(message_BtoP).encode()
+                mq_BtoP.send(message_BtoP)
+                
+
+            # Message Queue Player to Board
+            message_PtoB=ast.literal_eval(mq_PtoB.receive())
+            if(message_PtoB[0]==1):
+                value_PtoB = message_PtoB[2]
+                print("received:", value_PtoB[2])
+                numJoueur = value_PtoB[1]
+                if is_valid(self.card, value_PtoB[2]):
+                    self.card = value_PtoB[2]
+                    message = 1
+                    message_BtoP = "2,1,"+int(value_PtoB[2])
+                else:
+                    # Si mauvais on renvoie le numéro de la carte + 200
+                    message_BtoP = "2,1,"+int(200+value_PtoB[0])
+                    mq_PtoB.empty()
+            else:
+                print("exiting.")
+                break
+        mq_BtoP.remove()
+        mq_PtoB.remove()
 
 class Player(Process):
     def __init__(self, Pile, lock, iD):
