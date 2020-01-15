@@ -4,6 +4,8 @@ import time
 import ast
 from multiprocessing import Process, Array, Lock
 
+#debug timer
+
 key = 128
 mq = sysv_ipc.MessageQueue(key, sysv_ipc.IPC_CREAT)
 
