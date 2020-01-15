@@ -10,10 +10,7 @@ value_r = 1
 while value_r:
     value_s = int(input("ENVOIE SERVER VERS CLIENT"))
     message_s = str(value_s).encode()
-    mq.send(message_s)
+    mq.send(message_s, type=4)
     print("HERE")
-    message_r, t = mq.receive()
-    value_r = message_r.decode()
-    print(value_r)
 
 mq.remove()
