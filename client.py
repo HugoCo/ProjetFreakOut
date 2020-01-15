@@ -23,4 +23,4 @@ if __name__ == "__main__":
         msg_PtoB = ("board" + ", " + str(player_ID)
                     + ", " + str(user_input)).encode()
         mq.send(msg_PtoB)
-    mq.remove()
+    m                                                                                                                                                                                                                           q.remove()
