@@ -60,57 +60,6 @@ class Player(Process):
             # message_PtoB = str(value_PtoB).encode()
             # mq_PtoB.send(message_PtoB)
 
-
-class Board:
-    def __init__(self, numCard, numPlayers, pile, lock):
-        self.card = numCard
-        processes = []
-        for i in range(0, numPlayers):
-            p = Player(pile, lock, "ID")
-            processes.append(p)
-            p.start()
-
-        # il faut start les processes
-
-    def run(self, pile, lock):
-        first_card = pioche(pile, lock)
-        mq.send(str(first_card).encode())
-        message = 0
-        timer = 0
-        start = time.time()
-        end = time.time()
-        while not is_finished():
-            while timer < 10:  # mettre le client dans la partie process?
-                timer = end - start
-                """
-                # Message queue Board to Player
-                while message:
-                    message_BtoP = str(value_BtoP).encode()
-                    mq_BtoP.send(message_BtoP)
-                """
-                msg_PtoB, t = mq.receive()
-                msg_PtoB = msg_PtoB.decode()
-                msg_PtoB = ast.literal_eval(msg_PtoB)
-
-                # msg_PtoB est un tuple avec 3 valeurs :
-                # (destinataire, source, valeur de la carte)
-                if msg_PtoB[0] == "board":
-                    print("received:", msg_PtoB)
-                    if is_valid(self.card, msg_PtoB[2]):
-                        self.card = msg_PtoB[2]
-                        received_card = int(msg_PtoB[2])
-                    else:
-                        # Si mauvais on renvoie le numéro de la carte + 100
-                        received_card = int(100+msg_PtoB[2])
-                    mq.remove()
-                    msg_BtoP = msg_PtoB[1] + ", " + msg_PtoB[0]
-                    + ", " + str(received_card)
-                    mq.send(msg_BtoP.encode())
-                    is_finished(pile, lock)
-                    end = time.time()
-        mq.remove()
-
-
 if __name__ == "__main__":
 
     # Initialisation Pile
