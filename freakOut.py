@@ -34,20 +34,21 @@ def pioche(pile, lock):
 class Board:
     def __init__(self, num_card, num_players, pile, lock):
         self.card = num_card
-
-        processes = []
+        self.num_players = num_players
         for i in range(0, num_players):
             player_ID = mq.receive(type=2)
             p = Player(pile, lock, player_ID)
-            processes.append(p)
+            self.player_list.append(p)
             p.start()
 
         start = time.time()
         # il faut start les processes
 
-    def run(self, pile, lock):
+    def run(self, lock):
         first_card = pioche(pile, lock)
-        mq.send(("2,1,"+str(first_card)).encode())
+        for player in self.player_list:
+            first_card = first_card.encode()
+            mq.send(first_card, type=player.player_ID + 10000)
         message = 0
         while(not is_finished(pile, lock)):
             # Message Queue Player to Board
