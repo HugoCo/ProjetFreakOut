@@ -21,7 +21,7 @@ if __name__ == "__main__":
         if state == 0:
             user_input = int(input())
             msg_CtoB = (str(player_ID)).encode()
-            mq.send(msg_CtoB, type=1)
+            mq.send(msg_CtoB, type=2)
             state = 1
 
         if state == 1:

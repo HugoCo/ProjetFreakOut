@@ -86,9 +86,8 @@ class Player(Process):
             msg_BtoP, t = mq.receive(type=self.player_ID + 1)
             msg_BtoP = msg_BtoP.decode()
             msg_BtoP = int(msg_BtoP)
-            # msg_BtoP est un tuple avec 3 valeurs :
-            # (destinataire, source, valeur de la carte)
-            if msg_BtoP[3] < 100:
+
+            if msg_BtoP < 100:
                 top_of_pile = msg_BtoP
 
             for card in self.hand:
@@ -96,7 +95,7 @@ class Player(Process):
                     self.hand.remove(card)
                 elif msg_BtoP == (100 + card):
                     self.hand.append(pioche())
-            message_PtoC = str(value_PtoB).encode()
+            message_PtoC = str(msg_BtoP).encode()
             mq.send(message_PtoC)
 
             print("received:", msg_BtoP)
@@ -114,10 +113,9 @@ if __name__ == "__main__":
     # faire une fonction d'initialisation ou on construit une liste
     # avec tous les process ID
 
-    pile = list(range(-10,10))
-    lock=Lock()
-
+    pile = list(range(-10, 10))
+    lock = Lock()
     random.shuffle(pile)
     numJoueur = int(input("Entrez le nb de joueur :"))
-    pioche(pile,lock)
+    pioche(pile, lock)
     theBoard = Board(pile[0], numJoueur, pile, lock)

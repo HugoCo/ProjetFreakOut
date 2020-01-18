@@ -2,6 +2,9 @@ import sysv_ipc
 import time
 import os
 import pygame
+import sys
+import threading
+from multiprocessing import Queue
 key = 128
 player_ID = os.getpid()
 mq = sysv_ipc.MessageQueue(key)
@@ -9,23 +12,35 @@ cards_in_hand = list()
 user_input = 0
 timer = 0
 state = 0
-# state = 0 : Initialisation
+
 # state = 1 : Envoie un message
 # state = 2 : Attend la réponse
 # state = 3 : envoie la carte ou recois un msg si
-#c'est trop tard ou le résultat
+#             c'est trop tard ou le résultat
+
+
+def sending_card(input_queue):
+    while True:
+        input_queue.put(input())
+
 
 if __name__ == "__main__":
 
     while user_input != "quit":
-        if state == 0:
-            user_input = int(input())
+        if state == "init":
             msg_CtoB = (str(player_ID)).encode()
             mq.send(msg_CtoB, type=1)
-            state = 1
+            state = "ready, set..."
 
-        if state == 1:
-            user_input = int(input())
+            print(state)
+        if state == "ready, set...":
+            state = mq.receive(type=player_ID+1000).decode()
+            print(state)
+
+        if state == "go":
+            input_queue = Queue()
+            input_thread = threading.Thread(
+                target=sending_card, args=(input_queue,))
             msg_CtoB = (str(player_ID) + ", " + str(user_input)).encode()
             mq.send(msg_CtoB, type=1)
 
