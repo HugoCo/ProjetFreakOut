@@ -2,12 +2,13 @@ import sysv_ipc
 import random
 import time
 import ast
-from multiprocessing import Process, Array, Lock
+from multiprocessing import Process, Array, Lock, Queue
 
-#debug timer
+#debugger, timer, communication dans le main,
 
 key = 128
 mq = sysv_ipc.MessageQueue(key, sysv_ipc.IPC_CREAT)
+queue_PtoB = Queue()
 
 
 def is_finished(pile, lock):
@@ -50,7 +51,7 @@ class Board:
         first_card = pioche(pile, lock)
         for player in self.player_list:
             first_card = first_card.encode()
-            mq.send(first_card, type=player.player_ID + 10000)
+            mq.send(first_card, type=player.player_ID + 1000)
         message = 0
         while(not is_finished(pile, lock)):
             # Message Queue Player to Board

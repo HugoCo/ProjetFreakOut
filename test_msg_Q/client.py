@@ -1,21 +1,32 @@
 import sysv_ipc
 import time
-import ast
+import os
+import pygame
 key = 128
-
+player_ID = os.getpid()
 mq = sysv_ipc.MessageQueue(key)
-
-i = True
+cards_in_hand = list()
+user_input = 0
 timer = 0
-while True:
-    start = time.time()
-    end = time.time()
-    timer = end-start
-    print(timer)
-    if timer < 10:
-        print("DANS LA BOUCLE TIMER")
-        message_r, t = mq.receive(type=4)
-        value_r = message_r.decode()
-        print("msg recu")
-        print("received:", value_r)
-        print(t)
+state = 0
+# state = 0 : Initialisation
+# state = 1 : Envoie un message
+# state = 2 : Attend la réponse
+# state = 3 : envoie la carte ou recois un msg si
+#c'est trop tard ou le résultat
+
+if __name__ == "__main__":
+
+    while user_input != "quit":
+        if state == 0:
+            user_input = int(input())
+            msg_CtoB = (str(player_ID)).encode()
+            mq.send(msg_CtoB, type=1)
+            state = 1
+
+        if state == 1:
+            user_input = int(input())
+            msg_CtoB = (str(player_ID) + ", " + str(user_input)).encode()
+            mq.send(msg_CtoB, type=1)
+
+    mq.remove()
