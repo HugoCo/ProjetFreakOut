@@ -46,7 +46,8 @@ class Board:
         start = time.time()
         # il faut start les processes
 
-    def run(self, lock):
+<<<<<<< Updated upstream
+    def run(self, pile, lock):
         first_card = pioche(pile, lock)
         for player in self.player_list:
             first_card = first_card.encode()
@@ -64,6 +65,33 @@ class Board:
                 message = 1
                 msg_BtoP = (str(received_card)).encode()
                 mq.send(msg_BtoP, type=player_ID+1)
+=======
+    def run(self,pile,lock):
+        first_card=pioche(pile,lock)
+        mq_BtoP.send(("2,1,"+str(first_card)).encode())
+        message=0
+        while(not is_finished(pile,lock)):
+            #Message queue Board to Player
+            while message:
+                message_BtoP = str(message_BtoP).encode()
+                mq_BtoP.send(message_BtoP)
+                message=0
+            
+            # Message Queue Player to Board
+            message_PtoB=ast.literal_eval(mq_PtoB.receive()) # decode??
+            if(message_PtoB[0]==1):
+                value_PtoB = message_PtoB[2]
+                print("received:", value_PtoB[2])
+                numJoueur = value_PtoB[1]
+                if is_valid(self.card, value_PtoB[2]):
+                    self.card = value_PtoB[2]
+                    message = 1
+                    message_BtoP = "2,1,"+int(value_PtoB[2])
+                else:
+                    # Si mauvais on renvoie le numéro de la carte + 100
+                    message_BtoP = "2,1,"+int(100+value_PtoB[0])
+                    mq_PtoB.empty()
+>>>>>>> Stashed changes
             else:
                 # Si mauvais on renvoie le numéro de la carte + 200
                 msg_BtoP = (str(received_card+200)).encode()
@@ -84,6 +112,7 @@ class Player(Process):
         while(len(self.hand) != 0):
             msg_BtoP, t = mq.receive(type=self.player_ID + 1)
             msg_BtoP = msg_BtoP.decode()
+<<<<<<< Updated upstream
             msg_BtoP = int(msg_BtoP)
             # msg_BtoP est un tuple avec 3 valeurs :
             # (destinataire, source, valeur de la carte)
@@ -94,15 +123,29 @@ class Player(Process):
                 if msg_BtoP == card:
                     self.hand.remove(card)
                 elif msg_BtoP == (100 + card):
-                    self.hand.append(pioche())
+=======
+            msg_BtoP = ast.literal_eval(msg_BtoP)
 
+            if msg_BtoP[2] < 50:  # faire + 200 parce que -10+100 = 90 <100
+                top_of_pile = msg_BtoP[2]
+
+            for card in self.hand:
+                if msg_BtoP[2] == card:
+                    self.hand.remove(card)
+                elif msg_BtoP[2] == (100 + card):
+>>>>>>> Stashed changes
+                    self.hand.append(pioche())
+            message_PtoC = str(value_PtoB).encode()
+            mq.send(message_PtoC)
+
+<<<<<<< Updated upstream
             print("received:", msg_BtoP)
+=======
+            print("received:", msg_BtoP[2])
+>>>>>>> Stashed changes
             time_to_play = random.random()*10
             card_to_play = self.hand[int(random.random(len(self.hand)))]
             time.sleep(time_to_play)
-            # Pourquoi on renvoie ici ?
-            # message_PtoB = str(value_PtoB).encode()
-            # mq_PtoB.send(message_PtoB)
 
 
 if __name__ == "__main__":
