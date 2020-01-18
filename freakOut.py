@@ -38,22 +38,29 @@ class Board:
     def __init__(self, num_card, num_players, pile, lock):
         self.card = num_card
         self.num_players = num_players
-        for i in range(0, num_players):
+        self.player_list = []
+
+        for i in range(1):
             player_ID = mq.receive(type=2)
             p = Player(pile, lock, player_ID)
+            print("Player ", i , "initialized")
             self.player_list.append(p)
             p.start()
+            print("started")
+
+
 
         start = time.time()
         # il faut start les processes
 
     def run(self, pile, lock):
+        print("arrived to run board")
         first_card = pioche(pile, lock)
         for player in self.player_list:
             first_card = first_card.encode()
             mq.send(first_card, type=player.player_ID + 1000)
         message = 0
-        while(not is_finished(pile, lock)):
+        while not is_finished(pile, lock):
             # Message Queue Player to Board
             msg_PtoB, t = (mq.receive(type=1)).decode()
             msg_PtoB = ast.literal_eval(msg_PtoB)
@@ -76,9 +83,11 @@ class Board:
 
 class Player(Process):
     def __init__(self, pile, lock, player_ID):
+        super(Player, self).__init__()
         self.hand = []
         self.player_ID = player_ID
         for i in range(6):
+            print("pioche : i")
             self.hand.append(pioche(pile, lock))
 
     def run_random(self):
