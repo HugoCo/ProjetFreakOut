@@ -113,9 +113,11 @@ if __name__ == "__main__":
 
     # faire une fonction d'initialisation ou on construit une liste
     # avec tous les process ID
-    pile = Array('i', range(-10, 10))
-    lock = Lock()
+
+    pile = list(range(-10,10))
+    lock=Lock()
+
     random.shuffle(pile)
     numJoueur = int(input("Entrez le nb de joueur :"))
-    pioche(pile, lock)
-    #theBoard = Board(pile[0], numJoueur, pile, lock)
+    pioche(pile,lock)
+    theBoard = Board(pile[0], numJoueur, pile, lock)
