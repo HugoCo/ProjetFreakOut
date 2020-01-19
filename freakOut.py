@@ -41,17 +41,23 @@ class Board:
         self.player_list = []
 
         for i in range(1):
-            player_ID = mq.receive(type=2)
+            player_ID = int(mq.receive(type=2)[0].decode())
             p = Player(pile, lock, player_ID)
-            print("Player ", i , "initialized")
+            print("Player ", i, "initialized")
             self.player_list.append(p)
             p.start()
             print("started")
 
-
-
-        start = time.time()
         # il faut start les processes
+
+        def broadcast(self, msg, player=None):
+            if isinstance(player, Player):
+                for client in self.player_list:
+                    if client != player:
+                        mq.send(msg.encode(), type=player.player_ID+1000)
+            else:
+                for client in self.player_list:
+                    mq.send(msg.encode(), type=player.player_ID+1000)
 
     def run(self, pile, lock):
         print("arrived to run board")
