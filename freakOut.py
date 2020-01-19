@@ -50,14 +50,14 @@ class Board:
 
         # il faut start les processes
 
-        def broadcast(self, msg, player=None):
-            if isinstance(player, Player):
-                for client in self.player_list:
-                    if client != player:
-                        mq.send(msg.encode(), type=player.player_ID+1000)
-            else:
-                for client in self.player_list:
+    def broadcast(self, msg, player=None):
+        if isinstance(player, Player):
+            for client in self.player_list:
+                if client != player:
                     mq.send(msg.encode(), type=player.player_ID+1000)
+        else:
+            for client in self.player_list:
+                mq.send(msg.encode(), type=player.player_ID+1000)
 
     def run(self, pile, lock):
         print("arrived to run board")
