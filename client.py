@@ -39,9 +39,9 @@ if __name__ == "__main__":
 
         if state == "ready, set...":
             msg = mq.receive(type=player_ID+1000)[0].decode()
-            if (msg == "go"):
+            if msg == "go":
                 msg = state
-            print(state)
+            print(msg)
 
         if state == "go" or state == "not accepted":
             msg_CtoB = (str(player_ID) + ", "

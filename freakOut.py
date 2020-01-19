@@ -2,13 +2,12 @@ import sysv_ipc
 import random
 import time
 import ast
-from multiprocessing import Process, Lock, Queue
+from multiprocessing import Process, Lock, Pipe
 
 #debugger, timer, communication dans le main,
 
 key = 128
 mq = sysv_ipc.MessageQueue(key, sysv_ipc.IPC_CREAT)
-queue_PtoB = Queue()
 
 
 def is_finished(pile, lock):
@@ -39,10 +38,13 @@ class Board:
         self.card = num_card
         self.num_players = num_players
         self.player_list = []
+        self.board_con_list = []
 
         for i in range(1):
             player_ID = int(mq.receive(type=2)[0].decode())
-            p = Player(pile, lock, player_ID)
+            player_conn, board_conn = Pipe()
+            self.board_conn_list.append(board_conn)
+            p = Player(pile, lock, player_ID, player_conn)
             print("Player ", i, "initialized")
             self.player_list.append(p)
             p.start()
@@ -78,7 +80,9 @@ class Board:
                 self.card = received_card
                 message = 1
                 msg_BtoP = (str(received_card)).encode()
-                mq.send(msg_BtoP, type=player_ID+1)
+                for player, i in enumerate(self.player_list):
+                    if player.player_ID == player_ID:
+                        self.board_conn_list[i].send(received_card)
             else:
                 # Si mauvais on renvoie le numéro de la carte + 200
                 msg_BtoP = (str(received_card+200)).encode()
@@ -89,7 +93,7 @@ class Board:
 
 
 class Player(Process):
-    def __init__(self, pile, lock, player_ID):
+    def __init__(self, pile, lock, player_ID, player_conn):
         super(Player, self).__init__()
         self.hand = []
         self.player_ID = player_ID
@@ -134,4 +138,4 @@ if __name__ == "__main__":
     random.shuffle(pile)
     numJoueur = int(input("Entrez le nb de joueur :"))
     pioche(pile, lock)
-    theBoard = Board(pile[0], numJoueur, pile, lock)
+    theBoard = Board(pile[0], numJoueur, pile, lock, q)
