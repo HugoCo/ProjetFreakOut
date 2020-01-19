@@ -5,7 +5,6 @@ import threading
 from multiprocessing import Queue
 key = 128
 player_ID = os.getpid()
-mq = sysv_ipc.MessageQueue(key)
 cards_in_hand = list()
 user_input = 0
 timer = 0
@@ -24,6 +23,7 @@ def sending_card(input_queue):
 
 if __name__ == "__main__":
     print(player_ID)
+    mq = sysv_ipc.MessageQueue(key)
     input_queue = Queue()
     input_thread = threading.Thread(
         target=sending_card, args=(input_queue,))
@@ -34,16 +34,20 @@ if __name__ == "__main__":
         if state == "init":
             msg_CtoB = (str(player_ID)).encode()
             mq.send(msg_CtoB, type=2)
+            print("Voici les cartes piochées:")
+            hand = mq.receive(type=player_ID + 1000)[0].decode()
+            print(hand)
             state = "ready, set..."
             print(state)
 
         if state == "ready, set...":
             msg = mq.receive(type=player_ID+1000)[0].decode()
-            if (msg == "go"):
-                msg = state
-            print(state)
+            if msg == "go":
+                state = msg
+            print(msg)
 
         if state == "go" or state == "not accepted":
+            print("Quelle carte voulez-vous jouer?:")
             msg_CtoB = (str(player_ID) + ", "
                         + str(input_queue.get())).encode()
             mq.send(msg_CtoB, type=1)

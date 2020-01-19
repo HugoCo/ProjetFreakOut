@@ -69,7 +69,7 @@ class Board:
         message = 0
         while not is_finished(pile, lock):
             # Message Queue Player to Board
-            msg_PtoB, t = (mq.receive(type=1)).decode()
+            msg_PtoB= (mq.receive(type=1)[0]).decode()
             msg_PtoB = ast.literal_eval(msg_PtoB)
             print("received:", msg_PtoB)
             player_ID = msg_PtoB[0]
@@ -83,7 +83,11 @@ class Board:
                 # Si mauvais on renvoie le numéro de la carte + 200
                 msg_BtoP = (str(received_card+200)).encode()
                 mq.send(msg_BtoP, type=player_ID+1)
-            mq.empty()
+            while mq.current_messages != 0:
+                mq.receive()
+                print(mq.current_messages)
+                print("cleaning mq")
+
         print("exiting.")
         mq.remove()
 
@@ -93,9 +97,12 @@ class Player(Process):
         super(Player, self).__init__()
         self.hand = []
         self.player_ID = player_ID
-        for i in range(6):
+        print(player_ID)
+        for i in range(5):
             print("pioche : i")
             self.hand.append(pioche(pile, lock))
+        mq.send(("Votre main est"+ str(self.hand)).encode(),type=self.player_ID+1000)
+        print("main sent")
 
     def run_random(self):
         while(len(self.hand) != 0):
