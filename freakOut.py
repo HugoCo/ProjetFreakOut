@@ -2,7 +2,7 @@ import sysv_ipc
 import random
 import time
 import ast
-from multiprocessing import Process, Array, Lock, Queue
+from multiprocessing import Process, Lock, Queue
 
 #debugger, timer, communication dans le main,
 
@@ -54,10 +54,10 @@ class Board:
         if isinstance(player, Player):
             for client in self.player_list:
                 if client != player:
-                    mq.send(msg.encode(), type=player.player_ID+1000)
+                    mq.send(msg.encode(), type=client.player_ID+1000)
         else:
             for client in self.player_list:
-                mq.send(msg.encode(), type=player.player_ID+1000)
+                mq.send(msg.encode(), type=client.player_ID+1000)
 
     def run(self, pile, lock):
         print("arrived to run board")
