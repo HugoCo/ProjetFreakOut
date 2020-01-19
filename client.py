@@ -13,10 +13,8 @@ state = "init"
 start = 0
 timer = 0
 end = 0
-# state = 1 : Envoie un message
-# state = 2 : Attend la réponse
-# state = 3 : envoie la carte ou recois un msg si
-#             c'est trop tard ou le résultat
+
+# ajouter fin de la partie avec condition (pert ou gagne)
 
 
 def sending_card(input_queue):
@@ -71,4 +69,8 @@ if __name__ == "__main__":
                 state = mq.receive(type=player_ID+1000)[0].decode()
                 print(state)
 
+        if state == "Fin de la partie ":
+            user_input = "quit"
+
     mq.remove()
+    print("Partie Finie")
