@@ -47,6 +47,7 @@ class Board:
             self.player_list.append(p)
             p.start()
             print("started")
+            self.run(pile, lock)
 
         # il faut start les processes
 
@@ -63,7 +64,7 @@ class Board:
         print("arrived to run board")
         first_card = pioche(pile, lock)
         for player in self.player_list:
-            first_card = first_card.encode()
+            first_card = ("La première carte est : "+str(first_card)).encode()
             mq.send(first_card, type=player.player_ID + 1000)
         message = 0
         while not is_finished(pile, lock):
