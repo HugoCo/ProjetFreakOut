@@ -63,9 +63,9 @@ class Board:
     def run(self, pile, lock):
         print("arrived to run board")
         first_card = pioche(pile, lock)
-        for player in self.player_list:
-            first_card = ("La première carte est : "+str(first_card)).encode()
-            mq.send(first_card, type=player.player_ID + 1000)
+        first_card = ("La première carte est : " + str(first_card))
+        self.broadcast(first_card)
+        self.broadcast("go")
         message = 0
         while not is_finished(pile, lock):
             # Message Queue Player to Board
