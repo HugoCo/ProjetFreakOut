@@ -40,7 +40,7 @@ if __name__ == "__main__":
             print(state)
 
         if state == "ready, set...":
-            state = mq.receive(type=player_ID+1000)[0].decode()
+            state = mq.receive()[0].decode()
             print(state)
 
         if state == "go" or state == "not accepted":
