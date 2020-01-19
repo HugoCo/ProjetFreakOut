@@ -68,6 +68,7 @@ class Board:
         first_card = ("La première carte est : " + str(first_card))
         self.broadcast(first_card)
         self.broadcast("go")
+
         message = 0
         while not is_finished(pile, lock):
             # Message Queue Player to Board
