@@ -72,7 +72,7 @@ class Board:
         print("arrived to run board")
         self.card = pioche(pile, lock)
         self.card = ("La première carte est : " + str(self.card))
-        self.broadcast(first_card)
+        self.broadcast(self.card)
         self.broadcast("go")
 
         message = 0
