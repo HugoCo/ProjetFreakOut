@@ -70,8 +70,7 @@ if __name__ == "__main__":
                 mq.send("100", type=player_ID)
 
             if not input_queue.empty():
-                msg_CtoB = (str(player_ID) + ", "
-                            + str(input_queue.get())).encode()
+                msg_CtoB = (str(input_queue.get())).encode()
                 mq.send(msg_CtoB, type=player_ID)
                 state = mq.receive(type=player_ID+1000)[0].decode()
                 print(state)
