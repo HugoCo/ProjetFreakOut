@@ -28,7 +28,6 @@ def is_valid(board_card, player_card):
 def pioche(pile, lock):
     with lock:
         card_from_pile = pile[0]
-        print(pile[0])
         pile.pop(0)
     return card_from_pile
 
@@ -41,8 +40,8 @@ def cleanmq():
 
 
 class Board:
-    def __init__(self, num_card, num_players, pile, lock):
-        self.card = num_card
+    def __init__(self, num_players, pile, lock):
+        print("card on top" + str(self.card))
         self.num_players = num_players
         self.player_list = []
         self.queue_list = []
@@ -71,46 +70,43 @@ class Board:
 
     def run(self, pile, lock):
         print("arrived to run board")
-        first_card = pioche(pile, lock)
-        first_card = ("La première carte est : " + str(first_card))
+        self.card = pioche(pile, lock)
+        self.card = ("La première carte est : " + str(self.card))
         self.broadcast(first_card)
         self.broadcast("go")
 
         message = 0
         while not is_finished(pile, lock):
             # Message Queue Player to Board
-            msg_PtoB = (mq.receive(type=1)[0]).decode()
-            print(msg_PtoB)
-            print("received:", msg_PtoB)
-            player_ID = msg_PtoB
+            player_ID = int((mq.receive(type=1)[0]).decode())
             mq.send("Play a card".encode(), type=player_ID + 1000)
-            print(type(player_ID))
-            received_card = (mq.receive(type=player_ID)[0])
+            received_card = mq.receive(type=player_ID)[0].decode()
+            print("received_card" + str(received_card))
             if received_card == "Timeout":
                 #ajouter un message vers le player
                 cleanmq()
                 self.broadcast("go")
-
-            if is_valid(self.card, received_card):
+            print("card on top:" + str(self.card))
+            if is_valid(self.card, int(received_card)):
+                print("is valid")
                 self.card = received_card
-                print(self.card)
                 message = 1
                 msg_BtoP = (str(received_card)).encode()
                 mq.send(msg_BtoP, type=player_ID+10000)
                 for i, player in enumerate(self.player_list):
+                    print("enumarate for here")
                     if player.player_ID == player_ID:
                         self.queue_list[i].put(received_card)
             else:
+                print("is not valid")
                 # Si mauvais on renvoie le numéro de la carte + 200
                 # msg_BtoP = (str(received_card+200)).encode()
                 # mq.send(msg_BtoP, type=player_ID+1)
                 for i, player in enumerate(self.player_list):
                     if player.player_ID == player_ID:
-                        print(type(self.queue_list[i]))
                         self.queue_list[i].put(received_card + 200)
             while mq.current_messages != 0:
                 mq.receive()
-                print(mq.current_messages)
                 print("cleaning mq")
             cleanmq()
 
@@ -126,11 +122,10 @@ class Player(Process):
         self.q = q
         print(player_ID)
         for i in range(5):
-            print("pioche : i")
             self.hand.append(pioche(pile, lock))
         mq.send(("Votre main est" + str(self.hand)).encode(),
                 type=self.player_ID+1000)
-        print("main sent")
+        print("main sent " + str(self.hand))
         #self.run()
 
     def run(self):
@@ -140,7 +135,7 @@ class Player(Process):
                 mq.send(("Votre main est" + str(self.hand)).encode(),
                         type=self.player_ID+1000)
             if self.q.empty() == False:
-                print(HERE)
+                print("HERE")
                 msg_BtoP = self.q.get()
                 print("msg_BtoP", msg_BtoP)
 
@@ -174,4 +169,4 @@ if __name__ == "__main__":
     random.shuffle(pile)
     numJoueur = int(input("Entrez le nb de joueur :"))
     pioche(pile, lock)
-    theBoard = Board(pile[0], numJoueur, pile, lock)
+    theBoard = Board(numJoueur, pile, lock)
