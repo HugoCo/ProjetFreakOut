@@ -85,7 +85,7 @@ class Board:
             player_ID = msg_PtoB
             mq.send("Play a card".encode(), type=player_ID + 1000)
             print(type(player_ID))
-            received_card = (mq.receive(type=player_ID)[1])
+            received_card = (mq.receive(type=player_ID)[0])
             if received_card == "Timeout":
                 #ajouter un message vers le player
                 cleanmq()
