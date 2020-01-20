@@ -3,6 +3,7 @@ import time
 import os
 import threading
 from multiprocessing import Queue
+
 key = 128
 player_ID = os.getpid()
 cards_in_hand = list()
@@ -12,6 +13,8 @@ state = "init"
 start = 0
 timer = 0
 end = 0
+
+
 # effacer console : https://python.developpez.com/faq/?page=Console#GenClearDos
 # ajouter fin de la partie avec condition (pert ou gagne)
 
@@ -41,17 +44,23 @@ if __name__ == "__main__":
             print(state)
 
         if state == "ready, set...":
-            msg = mq.receive(type=player_ID+1000)[0].decode()
+            msg = mq.receive(type=player_ID + 1000)[0].decode()
             if msg == "go":
                 state = msg
             print(msg)
 
-        if state == "go" or state == "not accepted":
-            print("Quelle carte voulez-vous jouer?:")
-            msg_CtoB = (str(player_ID) + ", "
-                        + str(input_queue.get())).encode()
-            mq.send(msg_CtoB, type=1)
-            state = mq.receive(type=player_ID+1000)[0].decode()
+        if state == "go":
+            mq.send("Can I have my hand?", type=player_ID + 500)
+            print(mq.receive(type=player_ID + 1000))  # print la main du joueur
+            print("Entrez O ou o pour jouer, entrez une autre commande sinon:")
+            input_to_play = input_queue.get()
+            if input_to_play == "O" or "o":
+                msg_CtoB = (str(player_ID) + ", "
+                            + str(input_to_play))
+                print(type(msg_CtoB))
+                msg_CtoB.encode()
+                mq.send(msg_CtoB, type=1)
+                state = mq.receive(type=player_ID + 1000)[0].decode()
             print(state)
             start = time.time()
             print(start)
@@ -67,12 +76,12 @@ if __name__ == "__main__":
                 print(timer)
                 print("Pick a card")
                 state = "go"
-                mq.send("100", type=player_ID)
+                mq.send("Timeout", type=player_ID)
 
             if not input_queue.empty():
-                msg_CtoB = (str(input_queue.get())).encode()
+                msg_CtoB = str(input_queue.get()).encode()
                 mq.send(msg_CtoB, type=player_ID)
-                state = mq.receive(type=player_ID+1000)[0].decode()
+                state = mq.receive(type=player_ID + 1000)[0].decode()
                 print(state)
 
         if state == "Fin de la partie ":

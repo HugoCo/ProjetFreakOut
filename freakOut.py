@@ -80,13 +80,18 @@ class Board:
         while not is_finished(pile, lock):
             # Message Queue Player to Board
             msg_PtoB = (mq.receive(type=1)[0]).decode()
-            msg_PtoB = ast.literal_eval(msg_PtoB)
-            player_ID = int(msg_PtoB[0])
+            print(msg_PtoB)
+            print("received:", msg_PtoB)
+            player_ID = int(msg_PtoB[])
             mq.send("Play a card".encode(), type=player_ID + 1000)
-            received_card = int(mq.receive(type=player_ID)[1].decode)
-            print("received card = " + str(received_card)
+            print(type(player_ID))
+            received_card = (mq.receive(type=player_ID)[1])
+            if received_card == "Timeout":
+                #ajouter un message vers le player
+                cleanmq()
+                self.broadcast("go")
 
-            if is_valid(self.card, received_card):
+            elif is_valid(self.card, int(received_card)):
                 self.card = received_card
                 print(self.card)
                 message = 1
