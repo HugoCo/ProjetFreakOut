@@ -132,10 +132,12 @@ class Player(Process):
                 for card in self.hand:
                     if msg_BtoP == card:
                         self.hand.remove(card)
-                        mq.send("Coup correct, voici votre nouvelle main : " + str(self.hand).encode(), type=player_ID+1000)
+                        mq.send("Coup correct, voici votre nouvelle main : "
+                                + str(self.hand).encode(), type=player_ID+1000)
                     elif msg_BtoP == (200 + card):
                         self.hand.append(pioche())
-                        mq.send("Coup incorrect, vous piochez. Voici votre nouvelle main : " + str(self.hand).encode(), type=player_ID+1000)
+                        mq.send("Coup incorrect, vous piochez. Voici votre nouvelle main : "
+                                + str(self.hand).encode(), type=player_ID+1000)
 
             print("received:", msg_BtoP)
             time_to_play = random.random()*10
