@@ -47,6 +47,7 @@ class Board:
             p = Player(pile, lock, player_ID, player_conn)
             print("Player ", i, "initialized")
             self.player_list.append(p)
+            print(type(p))
             p.start()
             print("started")
             self.run(pile, lock)
@@ -76,6 +77,7 @@ class Board:
             msg_PtoB = ast.literal_eval(msg_PtoB)
             print("received:", msg_PtoB)
             player_ID = msg_PtoB[0]
+            print(player_ID)
             received_card = int(msg_PtoB[1])
             if is_valid(self.card, received_card):
                 self.card = received_card
@@ -94,7 +96,7 @@ class Board:
                     if player.player_ID == player_ID:
                         self.board_conn_list[i].send(received_card + 200)
             while mq.current_messages != 0:
-                mq.receive()
+                mq.receive(type=1)
                 print(mq.current_messages)
                 print("cleaning mq")
 
