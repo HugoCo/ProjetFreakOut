@@ -135,7 +135,12 @@ class Player(Process):
 
     def run(self):
         while len(self.hand) != 0:
+            msg_PtoC = mq.receive(type = self.player_ID + 500)[0].decode()
+            if(msg_PtoC == "Can I have my hand?"):
+                mq.send(("Votre main est" + str(self.hand)).encode(),
+                        type=self.player_ID+1000)
             if self.q.empty() == False:
+                print(HERE)
                 msg_BtoP = self.q.get()
                 print("msg_BtoP", msg_BtoP)
 

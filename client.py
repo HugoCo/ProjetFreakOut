@@ -51,7 +51,9 @@ if __name__ == "__main__":
 
         if state == "go":
             mq.send("Can I have my hand?", type=player_ID + 500)
-            print(mq.receive(type=player_ID + 1000))  # print la main du joueur
+            hand = mq.receive(type=player_ID + 1000)[0].decode()
+            print("HERE")
+            print(hand)  # print la main du joueur
             print("Entrez O ou o pour jouer, entrez une autre commande sinon:")
             input_to_play = input_queue.get()
             if input_to_play == "O" or "o":
