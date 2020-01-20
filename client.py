@@ -12,7 +12,7 @@ state = "init"
 start = 0
 timer = 0
 end = 0
-
+# effacer console : https://python.developpez.com/faq/?page=Console#GenClearDos
 # ajouter fin de la partie avec condition (pert ou gagne)
 
 

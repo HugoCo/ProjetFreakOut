@@ -92,7 +92,7 @@ class Board:
                 # mq.send(msg_BtoP, type=player_ID+1)
                 for player, i in enumerate(self.player_list):
                     if player.player_ID == player_ID:
-                        self.board_conn_list[i].send(received_card+ 200)
+                        self.board_conn_list[i].send(received_card + 200)
             while mq.current_messages != 0:
                 mq.receive()
                 print(mq.current_messages)
@@ -111,7 +111,8 @@ class Player(Process):
         for i in range(5):
             print("pioche : i")
             self.hand.append(pioche(pile, lock))
-        mq.send(("Votre main est" + str(self.hand)).encode(), type=self.player_ID+1000)
+        mq.send(("Votre main est" + str(self.hand)).encode(),
+                type=self.player_ID+1000)
         print("main sent")
 
     def run_random(self):
@@ -131,7 +132,7 @@ class Player(Process):
                 elif msg_BtoP == (100 + card):
                     self.hand.append(pioche())
             message_PtoC = str(msg_BtoP).encode()
-            mq.send(message_PtoC, type = self.player_ID+ 1000)
+            mq.send(message_PtoC, type=self.player_ID + 1000)
 
             print("received:", msg_BtoP)
             time_to_play = random.random()*10
