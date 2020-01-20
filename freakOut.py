@@ -45,7 +45,7 @@ class Board:
         self.card = num_card
         self.num_players = num_players
         self.player_list = []
-        self.board_con_list = []
+        self.board_conn_list = []
         cleanmq()
         for i in range(num_players):
             player_ID = int(mq.receive(type=2)[0].decode())
@@ -82,8 +82,9 @@ class Board:
             msg_PtoB = (mq.receive(type=1)[0]).decode()
             msg_PtoB = ast.literal_eval(msg_PtoB)
             print("received:", msg_PtoB)
-            player_ID = msg_PtoB[0]
+            player_ID = int(msg_PtoB[0])
             mq.send("Play a card".encode(), type=player_ID + 1000)
+            print(type(player_ID))
             received_card = (mq.receive(type=player_ID)[1])
             if is_valid(self.card, int(received_card)):
                 self.card = received_card
@@ -100,7 +101,7 @@ class Board:
                 # mq.send(msg_BtoP, type=player_ID+1)
                 for player, i in enumerate(self.player_list):
                     if player.player_ID == player_ID:
-                        self.board_conn_list[i].send(received_card+ 200)
+                        self.board_conn_list[i].send(received_card + 200)
             while mq.current_messages != 0:
                 mq.receive()
                 print(mq.current_messages)
@@ -139,7 +140,7 @@ class Player(Process):
                     if msg_BtoP == card:
                         self.hand.remove(card)
                         mq.send("Coup correct, voici votre nouvelle main : " + str(self.hand).encode(), type=player_ID+1000)
-                    elif msg_BtoP == (100 + card):
+                    elif msg_BtoP == (200 + card):
                         self.hand.append(pioche())
                         mq.send("Coup incorrect, vous piochez. Voici votre nouvelle main : " + str(self.hand).encode(), type=player_ID+1000)
 
