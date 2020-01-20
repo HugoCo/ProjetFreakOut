@@ -32,6 +32,13 @@ def pioche(pile, lock):
         pile.pop(0)
     return card_from_pile
 
+def cleanmq():
+    while mq.current_messages != 0:
+        mq.receive()
+        print(mq.current_messages)
+        print("cleaning mq")
+
+
 
 class Board:
     def __init__(self, num_card, num_players, pile, lock):
@@ -39,8 +46,8 @@ class Board:
         self.num_players = num_players
         self.player_list = []
         self.board_con_list = []
-
-        for i in range(1):
+        cleanmq()
+        for i in range(num_players):
             player_ID = int(mq.receive(type=2)[0].decode())
             player_conn, board_conn = Pipe()
             self.board_conn_list.append(board_conn)
@@ -49,7 +56,7 @@ class Board:
             self.player_list.append(p)
             p.start()
             print("started")
-            self.run(pile, lock)
+        self.run(pile, lock)
 
         # il faut start les processes
 
@@ -72,17 +79,18 @@ class Board:
         message = 0
         while not is_finished(pile, lock):
             # Message Queue Player to Board
-            msg_PtoB, t = (mq.receive(type=1))[0].decode()
+            msg_PtoB = (mq.receive(type=1)[0]).decode()
             msg_PtoB = ast.literal_eval(msg_PtoB)
             print("received:", msg_PtoB)
             player_ID = msg_PtoB[0]
-            received_card = int(msg_PtoB[1])
-            if is_valid(self.card, received_card):
+            mq.send("Play a card".encode(), type=player_ID + 1000)
+            received_card = (mq.receive(type=player_ID)[1])
+            if is_valid(self.card, int(received_card)):
                 self.card = received_card
                 print(self.card)
                 message = 1
-                # msg_BtoP = (str(received_card)).encode()
-                # mq.send(msg_BtoP, type=player_ID+1)
+                msg_BtoP = (str(received_card)).encode()
+                mq.send(msg_BtoP, type=player_ID+10000)
                 for player, i in enumerate(self.player_list):
                     if player.player_ID == player_ID:
                         self.board_conn_list[i].send(received_card)
@@ -97,6 +105,8 @@ class Board:
                 mq.receive()
                 print(mq.current_messages)
                 print("cleaning mq")
+            cleanmq()
+
 
         print("exiting.")
         mq.remove()
@@ -113,30 +123,27 @@ class Player(Process):
             self.hand.append(pioche(pile, lock))
         mq.send(("Votre main est" + str(self.hand)).encode(), type=self.player_ID+1000)
         print("main sent")
+        #self.run()
 
-    def run_random(self):
-        while(len(self.hand) != 0):
-            msg_BtoP = self.player_con.recv
-            print(msg_BtoP)
-            # msg_BtoP, t = mq.receive(type=self.player_ID + 1)
-            # msg_BtoP = msg_BtoP.decode()
-            # msg_BtoP = int(msg_BtoP)
+    def run(self):
+        while len(self.hand) != 0:
+            if mq.current_messages !=0:
+                msg_BtoP, t = mq.receive(type=self.player_ID + 500)
+                msg_BtoP = msg_BtoP.decode()
+                msg_BtoP = int(msg_BtoP)
 
-            if msg_BtoP < 100:
-                top_of_pile = msg_BtoP
+                if msg_BtoP < 100:
+                    top_of_pile = msg_BtoP
 
-            for card in self.hand:
-                if msg_BtoP == card:
-                    self.hand.remove(card)
-                elif msg_BtoP == (100 + card):
-                    self.hand.append(pioche())
-            message_PtoC = str(msg_BtoP).encode()
-            mq.send(message_PtoC, type = self.player_ID+ 1000)
+                for card in self.hand:
+                    if msg_BtoP == card:
+                        self.hand.remove(card)
+                        mq.send("Coup correct, voici votre nouvelle main : " + str(self.hand).encode(), type=player_ID+1000)
+                    elif msg_BtoP == (100 + card):
+                        self.hand.append(pioche())
+                        mq.send("Coup incorrect, vous piochez. Voici votre nouvelle main : " + str(self.hand).encode(), type=player_ID+1000)
 
-            print("received:", msg_BtoP)
-            time_to_play = random.random()*10
-            card_to_play = self.hand[int(random.random(len(self.hand)))]
-            time.sleep(time_to_play)
+                print("received:", msg_BtoP)
 
 
 if __name__ == "__main__":

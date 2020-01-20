@@ -67,11 +67,12 @@ if __name__ == "__main__":
                 print(timer)
                 print("Pick a card")
                 state = "go"
+                mq.send("100", type=player_ID)
 
             if not input_queue.empty():
                 msg_CtoB = (str(player_ID) + ", "
                             + str(input_queue.get())).encode()
-                mq.send(msg_CtoB, type=1)
+                mq.send(msg_CtoB, type=player_ID)
                 state = mq.receive(type=player_ID+1000)[0].decode()
                 print(state)
 
