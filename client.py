@@ -24,6 +24,17 @@ def sending_card(input_queue):
         input_queue.put(input())
 
 
+def print_hand(hand):
+    print("Votre main est : ")
+    hand_list = hand.strip('][').split(', ')
+    for i in range(len(hand_list)):
+        if int(hand_list[i]) < 0:
+            print("Bleu : " + str((-int(hand_list[i]))) + " | ", end='')
+
+        else:
+            print("Rouge : " + hand_list[i] + " | ", end='')
+
+
 if __name__ == "__main__":
     print(player_ID)
     mq = sysv_ipc.MessageQueue(key)
@@ -39,7 +50,7 @@ if __name__ == "__main__":
             mq.send(msg_CtoB, type=2)
             print("Voici les cartes piochées:")
             hand = mq.receive(type=player_ID + 1000)[0].decode()
-            print(hand)
+            print_hand(hand)
             state = "ready, set..."
             print(state)
 
@@ -51,7 +62,7 @@ if __name__ == "__main__":
 
         if state == "go":
             mq.send("Can I have my hand?", type=player_ID + 500)
-            print(mq.receive(type=player_ID + 1000))  # print la main du joueur
+            print_hand(mq.receive(type=player_ID + 1000))  # print la main du joueur
             print("Entrez O ou o pour jouer, entrez une autre commande sinon:")
             input_to_play = input_queue.get()
             if input_to_play == "O" or "o":

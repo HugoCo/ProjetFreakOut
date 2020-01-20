@@ -128,7 +128,7 @@ class Player(Process):
         for i in range(5):
             print("pioche : i")
             self.hand.append(pioche(pile, lock))
-        mq.send(("Votre main est" + str(self.hand)).encode(),
+        mq.send((str(self.hand)).encode(),
                 type=self.player_ID+1000)
         print("main sent")
         #self.run()
@@ -165,6 +165,8 @@ if __name__ == "__main__":
     # avec tous les process ID
 
     pile = list(range(-10, 10))
+    pile.pop(10)
+    print(pile)
     lock = Lock()
     random.shuffle(pile)
     numJoueur = int(input("Entrez le nb de joueur :"))
