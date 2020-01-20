@@ -91,7 +91,7 @@ class Board:
                 cleanmq()
                 self.broadcast("go")
 
-            elif is_valid(self.card, int(received_card)):
+            if is_valid(self.card, received_card):
                 self.card = received_card
                 print(self.card)
                 message = 1
