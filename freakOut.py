@@ -84,8 +84,8 @@ class Board:
             print("received:", msg_PtoB)
             player_ID = msg_PtoB
             mq.send("Play a card".encode(), type=player_ID + 1000)
-            received_card = int(mq.receive(type=player_ID)[1].decode)
-            print("received card = " + str(received_card)
+            received_card = int(mq.receive(type=player_ID)[0].decode)
+            print("received card = " + str(received_card))
 
             if is_valid(self.card, received_card):
                 self.card = received_card
