@@ -35,6 +35,14 @@ def print_hand(hand):
             print("Rouge : " + hand_list[i] + " | ", end='')
 
 
+def receive_hand():
+    hand = mq.receive(
+        type=player_ID + 1000)[0].decode()
+    hand = hand.strip('][').split(', ')
+    actual_hand = list(map(int, hand))
+    return actual_hand
+
+
 if __name__ == "__main__":
     print(player_ID)
     mq = sysv_ipc.MessageQueue(key)
@@ -48,9 +56,11 @@ if __name__ == "__main__":
         if state == "init":
             msg_CtoB = (str(player_ID)).encode()
             mq.send(msg_CtoB, type=2)
-            print("Voici les cartes piochées:")
+            #print("Voici les cartes piochées:")
             hand = mq.receive(type=player_ID + 1000)[0].decode()
-            print_hand(hand)
+            #print_hand(hand)
+            hand = hand.strip('][').split(', ')
+            actual_hand = list(map(int, hand))
             state = "ready, set..."
             print("")
             print(state)
@@ -62,10 +72,8 @@ if __name__ == "__main__":
             print(msg)
 
         if state == "go" or state == "Someone was faster !":
-            mq.send("Can I have my hand?", type=player_ID + 500)
-
-            actual_hand = mq.receive(type=player_ID + 1000)[0].decode()
-            print_hand(actual_hand)  # print la main du joueur
+            print("ACTUAL HAND")
+            print_hand(str(actual_hand))  # print la main du joueur
             print("Entrez O ou o pour jouer, entrez une autre commande sinon:")
             input_to_play = input_queue.get()
             if input_to_play == "O" or "o":
@@ -84,8 +92,9 @@ if __name__ == "__main__":
 
             elif timer >= 10:
                 print("Pick a card")
-                state = "go"
                 mq.send("Timeout", type=player_ID)
+                actual_hand = receive_hand()
+                state = "go"
 
             if not input_queue.empty():
                 msg_CtoB = str(input_queue.get())
@@ -95,25 +104,23 @@ if __name__ == "__main__":
                     msg_CtoB = msg_CtoB.replace("B", "-")
                     print(msg_CtoB)
                     msg_CtoB = int(msg_CtoB)
-                    actual_hand = actual_hand.strip('][').split(', ')
-                    actual_hand = list(map(int, actual_hand))
 
                     if -11 < msg_CtoB < 11 and msg_CtoB in actual_hand:
                         mq.send(str(msg_CtoB).encode(), type=player_ID)
-                        state = mq.receive(type=player_ID + 1000)[0].decode()
-                        print(state)
+                        actual_hand = receive_hand()
+                        state = "go"
+                        print("Dans PICK A CARD" + state)
                     else:
                         print("Saisie non valide, recommencez:")
                 # Check Rouge
                 elif msg_CtoB[0] == "R":
                     msg_CtoB = msg_CtoB.replace("R", "")
                     msg_CtoB = int(msg_CtoB)
-                    actual_hand = actual_hand.strip('][').split(', ')
-                    actual_hand = list(map(int, actual_hand))
 
                     if -11 < msg_CtoB < 11 and msg_CtoB in actual_hand:
                         mq.send(str(msg_CtoB).encode(), type=player_ID)
-                        state = mq.receive(type=player_ID + 1000)[0].decode()
+                        actual_hand = receive_hand()
+                        state = "go"
                         print(state)
                     else:
                         print("Saisie non valide, recommencez:")

@@ -43,13 +43,10 @@ def cleanmq(t=None):
 class Board:
     def __init__(self, num_players, player_list, pile, lock, queue_list):
         self.num_players = num_players
-        # self.player_list = []
         self.queue_list = queue_list
         self.player_list = player_list
         cleanmq()
         self.run(pile, lock)
-
-        # il faut start les processes
 
     def broadcast(self, msg, not_this_player=None):
         if isinstance(not_this_player, Player):
@@ -83,18 +80,16 @@ class Board:
                 for i, player in enumerate(self.player_list):
                     if player.player_ID == player_ID:
                         self.queue_list[i].put(new_card)
-                cleanmq()
-                self.broadcast("go")
 
             # card is valid
             elif is_valid(self.card, int(received_message)):
                 received_card = int(received_message)
                 print("is valid")
-                self.card = received_card
                 for i, player in enumerate(self.player_list):
                     if player.player_ID == player_ID:
                         self.queue_list[i].put(received_card)
                         print("HERE")
+                self.card = received_card
 
             # card is not valid
             # Si mauvais on renvoie le numéro de la carte + 200
@@ -131,10 +126,8 @@ class Player(Process):
         print("main sent " + str(self.hand))
 
     def run(self):
-        print(len(self.hand))
         while len(self.hand) != 0:
             # s'il y a encore des cartes dans la main
-            print(self.q.empty())
             if not self.q.empty():
                 print("Q not empty")
                 msg_BtoP = self.q.get()
@@ -145,20 +138,15 @@ class Player(Process):
                     if msg_BtoP == card:
                         self.hand.remove(card)
                         print("is valid = " + str(self.hand))
-                        mq.send(("Coup correct ! Voici votre nouvelle main : "
-                                 + str(self.hand)).encode(),
+                        mq.send((str(self.hand)).encode(),
                                 type=self.player_ID + 1000)
                         break
                     elif msg_BtoP == (200 + card) or msg_BtoP == 404:
+                        print("ERREUR 404")
                         self.hand.append(pioche(self.pile, self.lock))
-                        mq.send(("Coup incorrect, piochez ! Voici votre nouvelle main : "
-                                 + str(self.hand)).encode(),
+                        mq.send(str(self.hand).encode(),
                                 type=self.player_ID + 1000)
                         break
-
-            msg_CtoP = mq.receive(type=self.player_ID + 500)[0].decode()
-            if msg_CtoP == "Can I have my hand?":
-                mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
 
 
 if __name__ == "__main__":
