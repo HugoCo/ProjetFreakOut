@@ -78,7 +78,7 @@ class Board:
 
         message = 0
         while not is_finished(pile, lock):
-            # Message Queue Player to Board
+            # player envoie son ID suivit de la valeur de la carte
             player_ID = int((mq.receive(type=1)[0]).decode())
             mq.send("Play a card".encode(), type=player_ID + 1000)
             received_card = mq.receive(type=player_ID)[0].decode()

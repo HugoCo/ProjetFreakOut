@@ -106,6 +106,7 @@ class Board:
                 for i, player in enumerate(self.player_list):
                     if player.player_ID == player_ID:
                         self.queue_list[i].put(received_card + 200)
+            mq.send("go".encode(), type=player_ID + 1000)
             while mq.current_messages != 0:
                 mq.receive()
                 print("cleaning mq")
@@ -131,10 +132,10 @@ class Player(Process):
     def run(self):
         print("LA")
         while len(self.hand) != 0:
-            """msg_PtoC = mq.receive(type=self.player_ID + 500)[0].decode()
+            msg_PtoC = mq.receive(type=self.player_ID + 500)[0].decode()
             if(msg_PtoC == "Can I have my hand?"):
                 mq.send(("Votre main est" + str(self.hand)).encode(),
-                        type=self.player_ID+1000)"""
+                        type=self.player_ID+1000)
             if not self.q.empty():
                 print("HERE")
                 msg_BtoP = self.q.get()
