@@ -120,13 +120,12 @@ class Player(Process):
     def __init__(self, pile, lock, player_ID, q):
         super(Player, self).__init__()
         self.hand = []
-        self.player_ID = player_ID
+        self.player_ID = int(player_ID)
         self.q = q
         print(player_ID)
         for i in range(5):
             self.hand.append(pioche(pile, lock))
-        mq.send(((str(self.hand)).encode(),
-                type=self.player_ID+1000)
+        mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
         print("main sent " + str(self.hand))
 
     def run(self):
