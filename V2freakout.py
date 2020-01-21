@@ -37,7 +37,6 @@ def cleanmq(t=None):
             mq.receive(type=t)
         else:
             mq.receive()
-        print("cleaning mq")
 
 
 class Board:
@@ -58,7 +57,6 @@ class Board:
                 mq.send(msg.encode(), type=client.player_ID+1000)
 
     def run(self, pile, lock):
-        print("arrived to run board")
         self.card = pioche(pile, lock)
         top_of_pile = ("La première carte est : " + str(self.card))
         print(len(player_list))
@@ -72,7 +70,7 @@ class Board:
             mq.send("Play a card".encode(), type=player_ID + 1000)
             received_message = mq.receive(type=player_ID)[0].decode()
             print("received_message" + str(received_message))
-            if self.card<0:
+            if self.card < 0:
                 print("card on top: B" + str(-self.card))
             else:
                 print("card on top: R" + str(self.card))
@@ -104,10 +102,6 @@ class Board:
                         self.queue_list[i].put(received_message + 200)
                     # mq.send("go".encode(), type=player_ID + 1000)
 
-            """while mq.current_messages != 0:
-                not_accepted_ID = int(mq.receive(type=1).decode())
-                mq.send("Someone was faster !".encode(),
-                        type=not_accepted_ID + 1000)"""
             cleanmq()
 
         print("exiting.")
@@ -120,13 +114,13 @@ class Player(Process):
         self.hand = []
         self.player_ID = int(player_ID)
         self.q = q
-        self.pile = pile
-        self.lock = lock
         print(player_ID)
         for i in range(5):
-            self.hand.append(pioche(self.pile, self.lock))
+            self.hand.append(pioche(pile, lock))
         mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
         print("main sent " + str(self.hand))
+        self.lock = lock
+        self.pile = pile
 
     def run(self):
         while len(self.hand) != 0:

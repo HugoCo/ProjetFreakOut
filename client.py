@@ -13,6 +13,7 @@ start = 0
 timer = 0
 end = 0
 actual_hand = []
+msg = ""
 
 
 # effacer console : https://python.developpez.com/faq/?page=Console#GenClearDos
@@ -47,8 +48,7 @@ if __name__ == "__main__":
     print(player_ID)
     mq = sysv_ipc.MessageQueue(key)
     input_queue = Queue()
-    input_thread = threading.Thread(
-        target=sending_card, args=(input_queue,))
+    input_thread = threading.Thread(target=sending_card, args=(input_queue,))
     input_thread.start()
     start = time.time()
     while user_input != "quit":
@@ -56,9 +56,7 @@ if __name__ == "__main__":
         if state == "init":
             msg_CtoB = (str(player_ID)).encode()
             mq.send(msg_CtoB, type=2)
-            #print("Voici les cartes piochées:")
             hand = mq.receive(type=player_ID + 1000)[0].decode()
-            #print_hand(hand)
             hand = hand.strip('][').split(', ')
             actual_hand = list(map(int, hand))
             state = "ready, set..."
@@ -72,9 +70,9 @@ if __name__ == "__main__":
             print(msg)
 
         if state == "go" or state == "Someone was faster !":
-            print("ACTUAL HAND")
             print_hand(str(actual_hand))  # print la main du joueur
-            print("Entrez O ou o pour jouer, entrez une autre commande sinon:")
+            print("")
+            print("Entrez O ou o pour jouer:")
             input_to_play = input_queue.get()
             if input_to_play == "O" or "o":
                 msg_CtoB = str(player_ID).encode()
