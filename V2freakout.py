@@ -133,21 +133,22 @@ class Player(Process):
         self.hand = []
         self.player_ID = int(player_ID)
         self.q = q
+        self.pile = pile
+        self.lock = lock
         print(player_ID)
         for i in range(5):
-            self.hand.append(pioche(pile, lock))
+            self.hand.append(pioche(self.pile, self.lock))
         mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
         print("main sent " + str(self.hand))
 
     def run(self):
         print("LA")
         while len(self.hand) != 0:
-            msg_PtoC = mq.receive(type=self.player_ID + 500)[0].decode()
-            if msg_PtoC == "Can I have my hand?":
+            msg_CtoP = mq.receive(type=self.player_ID + 500)[0].decode()
+            if msg_CtoP == "Can I have my hand?":
                 mq.send((str(self.hand)).encode(),
                         type=self.player_ID+1000)
             if not self.q.empty():
-                print("HERE")
                 msg_BtoP = self.q.get()
                 print("msg_BtoP : ", msg_BtoP)
 
@@ -156,14 +157,16 @@ class Player(Process):
 
                 for card in self.hand:
                     if msg_BtoP == card:
+                        print("HERE")
                         self.hand.remove(card)
-                        mq.send("Coup correct ! Voici votre nouvelle main : "
-                                + str(self.hand).encode(),
+                        print("is valid = " + str(self.hand))
+                        mq.send(("Coup correct ! Voici votre nouvelle main : "
+                                 + str(self.hand)).encode(),
                                 type=self.player_ID + 1000)
                     elif msg_BtoP == (200 + card) or msg_BtoP == 404:
-                        self.hand.append(pioche(pile, lock))
-                        mq.send("Coup incorrect, piochez ! Voici votre nouvelle main : "
-                                + str(self.hand).encode(),
+                        self.hand.append(pioche(self.pile, self.lock))
+                        mq.send(("Coup incorrect, piochez ! Voici votre nouvelle main : "
+                                 + str(self.hand)).encode(),
                                 type=self.player_ID + 1000)
 
 
