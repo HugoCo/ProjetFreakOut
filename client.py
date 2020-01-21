@@ -81,7 +81,6 @@ if __name__ == "__main__":
                 timer = end - start
 
             elif timer >= 10:
-                print(timer)
                 print("Pick a card")
                 state = "go"
                 mq.send("Timeout", type=player_ID)
