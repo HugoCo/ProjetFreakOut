@@ -1,7 +1,7 @@
 import sysv_ipc
 import random
 import ast
-from multiprocessing import Process, Lock, Queue, Manager
+from multiprocessing import Process, Lock, Queue
 
 #debugger, timer, communication dans le main,
 
@@ -128,12 +128,7 @@ class Player(Process):
         print(player_ID)
         for i in range(5):
             self.hand.append(pioche(pile, lock))
-<<<<<<< HEAD
         mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
-=======
-        mq.send(str(self.hand).encode(),
-                type=self.player_ID+1000)
->>>>>>> 407071d011708aed31bebec9e69d6d42f153ef97
         print("main sent " + str(self.hand))
 
     def run(self):
