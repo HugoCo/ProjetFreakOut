@@ -146,8 +146,8 @@ class Player(Process):
         while len(self.hand) != 0:
             msg_CtoP = mq.receive(type=self.player_ID + 500)[0].decode()
             if msg_CtoP == "Can I have my hand?":
-                mq.send((str(self.hand)).encode(),
-                        type=self.player_ID+1000)
+                mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
+
             if not self.q.empty():
                 msg_BtoP = self.q.get()
                 print("msg_BtoP : ", msg_BtoP)
