@@ -6,7 +6,6 @@ from multiprocessing import Queue
 
 key = 128  # clé
 player_ID = os.getpid()
-cards_in_hand = list()
 user_input = 0
 timer = 0
 state = "init"
@@ -63,9 +62,10 @@ if __name__ == "__main__":
                 state = msg
             print(msg)
 
-        if state == "go":
+        if state == "go" or state == "Someone was faster !":
             mq.send("Can I have my hand?", type=player_ID + 500)
-            print_hand(mq.receive(type=player_ID + 1000)[0].decode())  # print la main du joueur
+            print_hand(mq.receive(type=player_ID + 1000)
+                       [0].decode())  # print la main du joueur
             print("Entrez O ou o pour jouer, entrez une autre commande sinon:")
             input_to_play = input_queue.get()
             if input_to_play == "O" or "o":
@@ -74,7 +74,6 @@ if __name__ == "__main__":
                 state = mq.receive(type=player_ID + 1000)[0].decode()
             print(state)
             start = time.time()
-            print(start)
 
         if state == "Play a card":
             end = time.time()
@@ -91,7 +90,7 @@ if __name__ == "__main__":
             if not input_queue.empty():
                 msg_CtoB = str(input_queue.get())
                 if msg_CtoB[0] == "B":
-                    msg_CtoB.replace("B", "-")
+                    msg_CtoB = msg_CtoB.replace("B", "-")
                     if type(msg_CtoB[1]) == int and 0 < msg_CtoB[1] < 11 and int(msg_CtoB) in actual_hand:
                         mq.send(msg_CtoB.encode(), type=player_ID)
                         state = mq.receive(type=player_ID + 1000)[0].decode()

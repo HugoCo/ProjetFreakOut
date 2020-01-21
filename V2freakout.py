@@ -47,15 +47,6 @@ class Board:
         self.queue_list = queue_list
         self.player_list = player_list
         cleanmq()
-        """for i in range(num_players):
-            player_ID = int(mq.receive(type=2)[0].decode())
-            q = Queue()
-            self.queue_list.append(q)
-            p = Player(pile, lock, player_ID, q)
-            print("Player ", i, "initialized")
-            self.player_list.append(p)
-            p.start()
-            print("started")"""
         self.run(pile, lock)
 
         # il faut start les processes
@@ -86,8 +77,8 @@ class Board:
             print("received_message" + str(received_message))
             print("card on top:" + str(self.card))
 
+            # client failed to send a card
             if received_message == "Timeout":
-                # ajouter un message vers le player
                 new_card = 404
                 for i, player in enumerate(self.player_list):
                     if player.player_ID == player_ID:
@@ -95,6 +86,7 @@ class Board:
                 cleanmq()
                 self.broadcast("go")
 
+            # card is valid
             elif is_valid(self.card, int(received_message)):
                 received_card = int(received_message)
                 print("is valid")
@@ -102,25 +94,25 @@ class Board:
                 msg_BtoP = (str(received_card)).encode()
                 mq.send(msg_BtoP, type=player_ID+10000)
                 for i, player in enumerate(self.player_list):
-                    print("enumarate for here")
                     if player.player_ID == player_ID:
                         self.queue_list[i].put(received_card)
 
+            # card is not valid
+            # Si mauvais on renvoie le numéro de la carte + 200
             else:
                 print("is not valid")
                 received_message = int(received_message)
                 msg_BtoP = (str(self.card)).encode()
                 mq.send(msg_BtoP, type=player_ID + 10000)
-                # Si mauvais on renvoie le numéro de la carte + 200
-                # msg_BtoP = (str(received_message+200)).encode()
-                # mq.send(msg_BtoP, type=player_ID+1)
                 for i, player in enumerate(self.player_list):
                     if player.player_ID == player_ID:
                         self.queue_list[i].put(received_message + 200)
             mq.send("go".encode(), type=player_ID + 1000)
+
             while mq.current_messages != 0:
-                mq.receive()
-                print("cleaning mq")
+                not_accepted_ID = int(mq.receive(type=1).decode())
+                mq.send("Someone was faster !".encode(),
+                        type=not_accepted_ID + 1000)
             cleanmq()
 
         print("exiting.")
@@ -148,16 +140,13 @@ class Player(Process):
             if msg_CtoP == "Can I have my hand?":
                 mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
 
+            # s'il y a encore des cartes dans la main
             if not self.q.empty():
                 msg_BtoP = self.q.get()
                 print("msg_BtoP : ", msg_BtoP)
 
-                # if msg_BtoP < 100:
-                # top_of_pile = msg_BtoP
-
                 for card in self.hand:
                     if msg_BtoP == card:
-                        print("HERE")
                         self.hand.remove(card)
                         print("is valid = " + str(self.hand))
                         mq.send(("Coup correct ! Voici votre nouvelle main : "
@@ -188,8 +177,8 @@ if __name__ == "__main__":
     queue_list = []
     player_list = []
     # pioche(pile, lock)
-
-    print("waiting for player")
+    # Waiting for all process Player to be connected before
+    print("Waiting for player")
     # initialisation players
     for i in range(numJoueur):
         player_ID = int(mq.receive(type=2)[0].decode())
