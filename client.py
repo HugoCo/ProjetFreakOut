@@ -17,7 +17,7 @@ actual_hand = []
 
 
 # effacer console : https://python.developpez.com/faq/?page=Console#GenClearDos
-# ajouter fin de la partie avec condition (pert ou gagne)
+# ajouter fin de la partie avec condition (perd ou gagne)
 
 
 def sending_card(input_queue):
