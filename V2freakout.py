@@ -11,7 +11,7 @@ mq = sysv_ipc.MessageQueue(key, sysv_ipc.IPC_CREAT)
 
 def is_finished(pile, lock):
     with lock:
-        if (len(pile) == 0):
+        if len(pile) == 0:
             return True
         return False
 
@@ -72,7 +72,10 @@ class Board:
             mq.send("Play a card".encode(), type=player_ID + 1000)
             received_message = mq.receive(type=player_ID)[0].decode()
             print("received_message" + str(received_message))
-            print("card on top:" + str(self.card))
+            if self.card<0:
+                print("card on top: B" + str(-self.card))
+            else:
+                print("card on top: R" + str(self.card))
 
             # client failed to send a card
             if received_message == "Timeout":
