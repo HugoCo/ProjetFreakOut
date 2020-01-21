@@ -54,6 +54,7 @@ if __name__ == "__main__":
             hand = mq.receive(type=player_ID + 1000)[0].decode()
             print_hand(hand)
             state = "ready, set..."
+            print("")
             print(state)
 
         if state == "ready, set...":
