@@ -125,7 +125,7 @@ class Player(Process):
         print(player_ID)
         for i in range(5):
             self.hand.append(pioche(pile, lock))
-        mq.send(("Votre main est" + str(self.hand)).encode(),
+        mq.send(((str(self.hand)).encode(),
                 type=self.player_ID+1000)
         print("main sent " + str(self.hand))
 
