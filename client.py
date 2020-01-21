@@ -89,6 +89,8 @@ if __name__ == "__main__":
 
             if not input_queue.empty():
                 msg_CtoB = str(input_queue.get())
+
+                # Check bleu
                 if msg_CtoB[0] == "B":
                     msg_CtoB = msg_CtoB.replace("B", "-")
                     print(msg_CtoB)
@@ -99,9 +101,10 @@ if __name__ == "__main__":
                     if -11 < msg_CtoB < 11 and msg_CtoB in actual_hand:
                         mq.send(str(msg_CtoB).encode(), type=player_ID)
                         state = mq.receive(type=player_ID + 1000)[0].decode()
+                        print(state)
                     else:
                         print("Saisie non valide, recommencez:")
-
+                # Check Rouge
                 elif msg_CtoB[0] == "R":
                     msg_CtoB = msg_CtoB.replace("R", "")
                     msg_CtoB = int(msg_CtoB)
@@ -111,6 +114,7 @@ if __name__ == "__main__":
                     if -11 < msg_CtoB < 11 and msg_CtoB in actual_hand:
                         mq.send(str(msg_CtoB).encode(), type=player_ID)
                         state = mq.receive(type=player_ID + 1000)[0].decode()
+                        print(state)
                     else:
                         print("Saisie non valide, recommencez:")
 

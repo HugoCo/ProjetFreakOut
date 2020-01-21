@@ -91,28 +91,25 @@ class Board:
                 received_card = int(received_message)
                 print("is valid")
                 self.card = received_card
-                msg_BtoP = (str(received_card)).encode()
-                mq.send(msg_BtoP, type=player_ID+10000)
                 for i, player in enumerate(self.player_list):
                     if player.player_ID == player_ID:
                         self.queue_list[i].put(received_card)
+                        print("HERE")
 
             # card is not valid
             # Si mauvais on renvoie le numéro de la carte + 200
             else:
                 print("is not valid")
                 received_message = int(received_message)
-                msg_BtoP = (str(self.card)).encode()
-                mq.send(msg_BtoP, type=player_ID + 10000)
                 for i, player in enumerate(self.player_list):
                     if player.player_ID == player_ID:
                         self.queue_list[i].put(received_message + 200)
-            mq.send("go".encode(), type=player_ID + 1000)
+                    # mq.send("go".encode(), type=player_ID + 1000)
 
-            while mq.current_messages != 0:
+            """while mq.current_messages != 0:
                 not_accepted_ID = int(mq.receive(type=1).decode())
                 mq.send("Someone was faster !".encode(),
-                        type=not_accepted_ID + 1000)
+                        type=not_accepted_ID + 1000)"""
             cleanmq()
 
         print("exiting.")
@@ -134,29 +131,34 @@ class Player(Process):
         print("main sent " + str(self.hand))
 
     def run(self):
-        print("LA")
+        print(len(self.hand))
         while len(self.hand) != 0:
-            msg_CtoP = mq.receive(type=self.player_ID + 500)[0].decode()
-            if msg_CtoP == "Can I have my hand?":
-                mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
-
             # s'il y a encore des cartes dans la main
+            print(self.q.empty())
             if not self.q.empty():
+                print("Q not empty")
                 msg_BtoP = self.q.get()
                 print("msg_BtoP : ", msg_BtoP)
 
                 for card in self.hand:
+                    print("check cards")
                     if msg_BtoP == card:
                         self.hand.remove(card)
                         print("is valid = " + str(self.hand))
                         mq.send(("Coup correct ! Voici votre nouvelle main : "
                                  + str(self.hand)).encode(),
                                 type=self.player_ID + 1000)
+                        break
                     elif msg_BtoP == (200 + card) or msg_BtoP == 404:
                         self.hand.append(pioche(self.pile, self.lock))
                         mq.send(("Coup incorrect, piochez ! Voici votre nouvelle main : "
                                  + str(self.hand)).encode(),
                                 type=self.player_ID + 1000)
+                        break
+
+            msg_CtoP = mq.receive(type=self.player_ID + 500)[0].decode()
+            if msg_CtoP == "Can I have my hand?":
+                mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
 
 
 if __name__ == "__main__":
