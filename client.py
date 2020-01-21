@@ -63,13 +63,9 @@ if __name__ == "__main__":
 
         if state == "go" or state == "Someone was faster !":
             mq.send("Can I have my hand?", type=player_ID + 500)
-<< << << < HEAD
-            print_hand(mq.receive(type=player_ID + 1000)
-                       [0].decode())  # print la main du joueur
-== == == =
+
             actual_hand = mq.receive(type=player_ID + 1000)[0].decode()
             print_hand(actual_hand)  # print la main du joueur
->>>>>> > e5ecaf0acbdbeb14818b6c4382f911f0da7dbb98
             print("Entrez O ou o pour jouer, entrez une autre commande sinon:")
             input_to_play = input_queue.get()
             if input_to_play == "O" or "o":
@@ -95,10 +91,6 @@ if __name__ == "__main__":
                 msg_CtoB = str(input_queue.get())
                 if msg_CtoB[0] == "B":
                     msg_CtoB = msg_CtoB.replace("B", "-")
-<<<<<<< HEAD
-                    if type(msg_CtoB[1]) == int and 0 < msg_CtoB[1] < 11 and int(msg_CtoB) in actual_hand:
-                        mq.send(msg_CtoB.encode(), type=player_ID)
-=======
                     print(msg_CtoB)
                     msg_CtoB = int(msg_CtoB)
                     actual_hand = actual_hand.strip('][').split(', ')
@@ -106,7 +98,6 @@ if __name__ == "__main__":
 
                     if -11 < msg_CtoB < 11 and msg_CtoB in actual_hand:
                         mq.send(str(msg_CtoB).encode(), type=player_ID)
->>>>>>> e5ecaf0acbdbeb14818b6c4382f911f0da7dbb98
                         state = mq.receive(type=player_ID + 1000)[0].decode()
                     else:
                         print("Saisie non valide, recommencez:")
