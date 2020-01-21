@@ -66,10 +66,20 @@ class Board:
 
     def run(self, pile, lock):
         self.card = pioche(pile, lock)
+<<<<<<< HEAD
         toppile = cardtodisplay(self.card)
         print(toppile)
         self.broadcast(toppile)
         self.broadcast("Go !")
+=======
+        if self.card < 0:
+            top_of_pile = "La première carte est : Bleu " + str(-self.card)
+        else:
+            top_of_pile = "La première carte est : Rouge " + str(self.card)
+        print(len(player_list))
+        self.broadcast(top_of_pile)
+        self.broadcast("go")
+>>>>>>> b605ecaa1d679f8c0b0f67a1ce36cfe3315909f7
 
         while not is_finished(pile, lock):
             # premier message : ID du player
