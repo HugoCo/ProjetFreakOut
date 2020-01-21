@@ -60,7 +60,10 @@ class Board:
     def run(self, pile, lock):
         print("arrived to run board")
         self.card = pioche(pile, lock)
-        top_of_pile = ("La première carte est : " + str(self.card))
+        if self.card < 0:
+            top_of_pile = "La première carte est : Bleu " + str(-self.card)
+        else:
+            top_of_pile = "La première carte est : Rouge " + str(self.card)
         print(len(player_list))
         self.broadcast(top_of_pile)
         self.broadcast("go")
