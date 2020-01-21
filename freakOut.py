@@ -100,6 +100,8 @@ class Board:
                         self.queue_list[i].put(received_card)
             else:
                 print("is not valid")
+                msg_BtoP = (str(received_card)).encode()
+                mq.send(msg_BtoP, type=player_ID + 10000)
                 # Si mauvais on renvoie le numéro de la carte + 200
                 # msg_BtoP = (str(received_card+200)).encode()
                 # mq.send(msg_BtoP, type=player_ID+1)

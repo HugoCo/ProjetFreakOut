@@ -100,6 +100,9 @@ class Board:
                         self.queue_list[i].put(received_card)
             else:
                 print("is not valid")
+                received_card = int(received_card)
+                msg_BtoP = (str(self.card)).encode()
+                mq.send(msg_BtoP, type=player_ID + 10000)
                 # Si mauvais on renvoie le numéro de la carte + 200
                 # msg_BtoP = (str(received_card+200)).encode()
                 # mq.send(msg_BtoP, type=player_ID+1)
@@ -125,15 +128,20 @@ class Player(Process):
         print(player_ID)
         for i in range(5):
             self.hand.append(pioche(pile, lock))
+<<<<<<< HEAD
         mq.send((str(self.hand)).encode(), type=self.player_ID+1000)
+=======
+        mq.send(str(self.hand).encode(),
+                type=self.player_ID+1000)
+>>>>>>> 407071d011708aed31bebec9e69d6d42f153ef97
         print("main sent " + str(self.hand))
 
     def run(self):
         print("LA")
         while len(self.hand) != 0:
             msg_PtoC = mq.receive(type=self.player_ID + 500)[0].decode()
-            if(msg_PtoC == "Can I have my hand?"):
-                mq.send(("Votre main est" + str(self.hand)).encode(),
+            if msg_PtoC == "Can I have my hand?":
+                mq.send((str(self.hand)).encode(),
                         type=self.player_ID+1000)
             if not self.q.empty():
                 print("HERE")
