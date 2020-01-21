@@ -4,7 +4,7 @@ import os
 import threading
 from multiprocessing import Queue
 
-key = 128 # clé
+key = 128  # clé
 player_ID = os.getpid()
 cards_in_hand = list()
 user_input = 0
@@ -13,6 +13,7 @@ state = "init"
 start = 0
 timer = 0
 end = 0
+actual_hand = []
 
 
 # effacer console : https://python.developpez.com/faq/?page=Console#GenClearDos
@@ -26,6 +27,7 @@ def sending_card(input_queue):
 
 def print_hand(hand):
     print("Votre main est : ")
+    actual_hand = hand
     hand_list = hand.strip('][').split(', ')
     for i in range(len(hand_list)):
         if int(hand_list[i]) < 0:
@@ -86,9 +88,26 @@ if __name__ == "__main__":
                 mq.send("Timeout", type=player_ID)
 
             if not input_queue.empty():
-                msg_CtoB = str(input_queue.get()).encode()
-                mq.send(msg_CtoB, type=player_ID)
-                state = mq.receive(type=player_ID + 1000)[0].decode()
+                msg_CtoB = str(input_queue.get())
+                if msg_CtoB[0] == "B":
+                    msg_CtoB.replace("B", "-")
+                    if type(msg_CtoB[1]) == int and 0 < msg_CtoB[1] < 11 and int(msg_CtoB) in actual_hand:
+                        mq.send(msg_CtoB.encode(), type=player_ID)
+                        state = mq.receive(type=player_ID + 1000)[0].decode()
+                    else:
+                        print("Saisie non valide, recommencez:")
+
+                elif msg_CtoB[0] == "R":
+                    msg_CtoB.replace("R", "")
+                    if type(msg_CtoB[0]) == int and 0 < msg_CtoB[0] < 11 and int(msg_CtoB) in actual_hand:
+                        mq.send(msg_CtoB.encode(), type=player_ID)
+                        state = mq.receive(type=player_ID + 1000)[0].decode()
+                    else:
+                        print("Saisie non valide, recommencez:")
+
+                else:
+                    print("Saisie non valide, recommencez:")
+
                 print(state)
 
         if state == "Fin de la partie ":
