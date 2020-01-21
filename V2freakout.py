@@ -78,18 +78,25 @@ class Board:
         self.broadcast("go")
 
         while not is_finished(pile, lock):
-            # Message Queue Player to Board
+            # premier message : ID du player
+            #
             player_ID = int((mq.receive(type=1)[0]).decode())
             mq.send("Play a card".encode(), type=player_ID + 1000)
-            received_card = mq.receive(type=player_ID)[0].decode()
-            print("received_card" + str(received_card))
-            if received_card == "Timeout":
+            received_message = mq.receive(type=player_ID)[0].decode()
+            print("received_message" + str(received_message))
+            print("card on top:" + str(self.card))
+
+            if received_message == "Timeout":
                 # ajouter un message vers le player
+                new_card = 404
+                for i, player in enumerate(self.player_list):
+                    if player.player_ID == player_ID:
+                        self.queue_list[i].put(new_card)
                 cleanmq()
                 self.broadcast("go")
-            print("card on top:" + str(self.card))
-            if is_valid(self.card, int(received_card)):
-                received_card = int(received_card)
+
+            elif is_valid(self.card, int(received_message)):
+                received_card = int(received_message)
                 print("is valid")
                 self.card = received_card
                 msg_BtoP = (str(received_card)).encode()
@@ -98,17 +105,18 @@ class Board:
                     print("enumarate for here")
                     if player.player_ID == player_ID:
                         self.queue_list[i].put(received_card)
+
             else:
                 print("is not valid")
-                received_card = int(received_card)
+                received_message = int(received_message)
                 msg_BtoP = (str(self.card)).encode()
                 mq.send(msg_BtoP, type=player_ID + 10000)
                 # Si mauvais on renvoie le numéro de la carte + 200
-                # msg_BtoP = (str(received_card+200)).encode()
+                # msg_BtoP = (str(received_message+200)).encode()
                 # mq.send(msg_BtoP, type=player_ID+1)
                 for i, player in enumerate(self.player_list):
                     if player.player_ID == player_ID:
-                        self.queue_list[i].put(received_card + 200)
+                        self.queue_list[i].put(received_message + 200)
             mq.send("go".encode(), type=player_ID + 1000)
             while mq.current_messages != 0:
                 mq.receive()
@@ -141,7 +149,7 @@ class Player(Process):
             if not self.q.empty():
                 print("HERE")
                 msg_BtoP = self.q.get()
-                print("msg_BtoP", msg_BtoP)
+                print("msg_BtoP : ", msg_BtoP)
 
                 # if msg_BtoP < 100:
                 # top_of_pile = msg_BtoP
@@ -149,13 +157,14 @@ class Player(Process):
                 for card in self.hand:
                     if msg_BtoP == card:
                         self.hand.remove(card)
-                        mq.send("Coup correct, voici votre nouvelle main : "
-                                + str(self.hand).encode(), type=self.player_ID + 1000)
-                    elif msg_BtoP == (200 + card):
-                        self.hand.append(pioche())
-                        mq.send("Coup incorrect, vous piochez. Voici votre nouvelle main : "
-                                + str(self.hand).encode(), type=self.player_ID + 1000)
-                print("received:", msg_BtoP)
+                        mq.send("Coup correct ! Voici votre nouvelle main : "
+                                + str(self.hand).encode(),
+                                type=self.player_ID + 1000)
+                    elif msg_BtoP == (200 + card) or msg_BtoP == 404:
+                        self.hand.append(pioche(pile, lock))
+                        mq.send("Coup incorrect, piochez ! Voici votre nouvelle main : "
+                                + str(self.hand).encode(),
+                                type=self.player_ID + 1000)
 
 
 if __name__ == "__main__":
