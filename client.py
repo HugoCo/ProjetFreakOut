@@ -4,7 +4,7 @@ import os
 import threading
 from multiprocessing import Queue
 
-key = 128
+key = 128 # clé
 player_ID = os.getpid()
 cards_in_hand = list()
 user_input = 0
