@@ -66,9 +66,16 @@ class Board:
 
     def run(self, pile, lock):
         self.card = pioche(pile, lock)
+<<<<<<< HEAD
         self.broadcast(cardtodisplay(self.card))
         self.broadcast("Go !")
         print("taille de la pile", len(pile))
+=======
+        toppile = cardtodisplay(self.card)
+        print(toppile)
+        self.broadcast(toppile)
+        self.broadcast("Go !")
+>>>>>>> parent of f6c788f... Merge branch 'master' of https://github.com/HugoCo/ProjetFreakOut
 
         while not is_finished(pile, lock):
             # premier message : ID du player
