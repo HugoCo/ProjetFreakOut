@@ -59,32 +59,35 @@ if __name__ == "__main__":
 
         if state == "init":
             msg_CtoB = (str(player_ID)).encode()
+            print(first_card)
             mq.send(msg_CtoB, type=2)
             hand = mq.receive(type=player_ID + 1000)[0].decode()
             hand = hand.strip('][').split(', ')
             actual_hand = list(map(int, hand))
             state = "Ready, set..."
-            print("")
-            print(state)
 
         if state == "Ready, set...":
             msg = mq.receive(type=player_ID + 1000)[0].decode()
             if msg == "Go !":
                 state = msg
+            else :
+                msg = first_card
             print(state)
             print(msg)
 
         if state == "Go !" or state == "Someone was faster !":
             if(get_printed == True):
                 os.system('clear')
+                print(first_card)
                 print_hand(str(actual_hand))  # print la main du joueur
                 print("")
                 print("Enter O ou o to play:")
-                print(msg)
+                #print(msg)
             try:
                 state = mq.receive(
                     block=False, type=player_ID + 1000)[0].decode()
                 get_printed = True
+                print(state)
             except sysv_ipc.BusyError:
                 pass
 
@@ -94,9 +97,10 @@ if __name__ == "__main__":
                     msg_CtoB = str(player_ID).encode()
                     mq.send(msg_CtoB, type=1)
                     state = mq.receive(type=player_ID + 1000)[0].decode()
+                    first_card = mq.receive(
+                        block=True, type=player_ID + 1000)[0].decode()
                     print(state)
-                    if(state == "Someone was faster !"):
-                        print("Enter O ou o to play:")
+                    get_printed = True
                     start = time.time()
             get_printed = False
 

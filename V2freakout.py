@@ -49,7 +49,7 @@ def cardtodisplay(card):
 
 
 class Board:
-    def __init__(self, num_players, player_list, pile, lock):
+    def __init__(self, num_players, player_list, lock):
         self.num_players = num_players
         self.player_list = player_list
         cleanmq()
@@ -66,14 +66,12 @@ class Board:
 
     def run(self, pile, lock):
         self.card = pioche(pile, lock)
-        toppile = cardtodisplay(self.card)
-        print(toppile)
-        self.broadcast(toppile)
+        self.broadcast(cardtodisplay(self.card))
         self.broadcast("Go !")
+        print("taille de la pile", len(pile))
 
         while not is_finished(pile, lock):
             # premier message : ID du player
-            #
             player_ID = int((mq.receive(type=1)[0]).decode())
             mq.send("Play a card".encode(), type=player_ID + 1000)
             received_message = mq.receive(type=player_ID)[0].decode()
@@ -83,12 +81,14 @@ class Board:
             if received_message == "Timeout":
                 pick_card = 404
                 mqBP.send(str(pick_card).encode(), type=player_ID + 500)
+                mqBP.send(cardtodisplay(self.card).encode(), type=player_ID + 500)
 
             # card is valid
             elif is_valid(self.card, int(received_message)):
                 print("is valid")
                 mqBP.send(str(received_message).encode(), type=player_ID + 500)
                 self.card = int(received_message)
+                mqBP.send(cardtodisplay(self.card).encode(), type=player_ID + 500)
 
             # card is not valid
             # Si mauvais on renvoie le numéro de la carte + 200
@@ -96,9 +96,11 @@ class Board:
                 print("is not valid")
                 received_message = int(received_message) + 200
                 mqBP.send(str(received_message).encode(), type=player_ID + 500)
+                mqBP.send(cardtodisplay(self.card).encode(), type=player_ID + 500)
 
             cleanmq()
             self.broadcast("Someone was faster !", player_ID)
+            self.broadcast(cardtodisplay(self.card), player_ID)
         print("exiting.")
         mq.remove()
 
@@ -120,6 +122,7 @@ class Player(Process):
             if mq.current_messages != 0:
                 print("Q not empty")
                 msg = int(mqBP.receive(type=self.player_ID + 500)[0].decode())
+                card_top = mqBP.receive(type=self.player_ID + 500)[0].decode()
 
                 for card in self.hand:
                     print("check cards")
@@ -128,11 +131,15 @@ class Player(Process):
                         print("is valid = " + str(self.hand))
                         mq.send((str(self.hand)).encode(),
                                 type=self.player_ID + 1000)
+                        mq.send(card_top.encode(),
+                                type=self.player_ID + 1000)
                         break
                     elif msg == (200 + card) or msg == 404:
                         print("ERREUR 404")
                         self.hand.append(pioche(pile, lock))
                         mq.send(str(self.hand).encode(),
+                                type=self.player_ID + 1000)
+                        mq.send(card_top.encode(),
                                 type=self.player_ID + 1000)
                         break
 
@@ -160,5 +167,5 @@ if __name__ == "__main__":
         player_list.append(p)
         p.start()
 
-    theBoard = Board(numJoueur, player_list, pile, lock)
+    theBoard = Board(numJoueur, player_list, lock)
     theBoard.start()
